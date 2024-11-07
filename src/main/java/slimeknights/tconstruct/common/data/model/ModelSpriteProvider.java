@@ -19,6 +19,7 @@ import slimeknights.tconstruct.shared.block.SlimeType;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static slimeknights.tconstruct.TConstruct.getResource;
 
@@ -32,8 +33,8 @@ public class ModelSpriteProvider extends GenericTextureGenerator {
     spriteReader = new DataGenSpriteReader(existingFileHelper, "textures");
   }
 
-  @Override
-  public void run(CachedOutput cache) throws IOException {
+  @Override // TODO: Make this throw IOException
+  public CompletableFuture<?> run(CachedOutput cachedOutput){
     ResourceLocation rootsSide = getResource("block/wood/enderbark/roots");
     ResourceLocation rootsTop = getResource("block/wood/enderbark/roots_top");
 
@@ -41,18 +42,35 @@ public class ModelSpriteProvider extends GenericTextureGenerator {
     for (SlimeType slime : SlimeType.values()) {
       String name = slime.getSerializedName();
       ResourceLocation congealed = getResource("block/slime/storage/congealed_" + name);
-      stackSprites(cache, getResource("block/wood/enderbark/roots/" + name), rootsSide, congealed);
-      stackSprites(cache, getResource("block/wood/enderbark/roots/" + name + "_top"), rootsTop, congealed);
+      stackSprites(cachedOutput, getResource("block/wood/enderbark/roots/" + name), rootsSide, congealed);
+      stackSprites(cachedOutput, getResource("block/wood/enderbark/roots/" + name + "_top"), rootsTop, congealed);
     }
 
     // dummy parts
     ISpriteTransformer stoneColor = new RecolorSpriteTransformer(GreyToColorMapping.builderFromBlack().addARGB(63, 0xFF181818).addARGB(102, 0xFF494949).addARGB(140, 0xFF5A5A5A).addARGB(178, 0xFF787777).addARGB(216, 0xFF95918D).addARGB(255, 0xFFB3B1AF).build());
-    transformSprite(cache, getResource("item/tool/parts/plating_helmet"),     getResource("item/tool/armor/plate/helmet/plating"), new OffsettingSpriteTransformer(stoneColor, 0, 2));
-    transformSprite(cache, getResource("item/tool/parts/plating_chestplate"), getResource("item/tool/armor/plate/chestplate/plating"), stoneColor);
-    transformSprite(cache, getResource("item/tool/parts/plating_leggings"),   getResource("item/tool/armor/plate/leggings/plating"), new OffsettingSpriteTransformer(stoneColor, 0, 1));
-    transformSprite(cache, getResource("item/tool/parts/plating_boots"),      getResource("item/tool/armor/plate/boots/plating"), stoneColor);
+    try {
+      transformSprite(cachedOutput, getResource("item/tool/parts/plating_helmet"),     getResource("item/tool/armor/plate/helmet/plating"), new OffsettingSpriteTransformer(stoneColor, 0, 2));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    try {
+      transformSprite(cachedOutput, getResource("item/tool/parts/plating_chestplate"), getResource("item/tool/armor/plate/chestplate/plating"), stoneColor);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    try {
+      transformSprite(cachedOutput, getResource("item/tool/parts/plating_leggings"),   getResource("item/tool/armor/plate/leggings/plating"), new OffsettingSpriteTransformer(stoneColor, 0, 1));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    try {
+      transformSprite(cachedOutput, getResource("item/tool/parts/plating_boots"),      getResource("item/tool/armor/plate/boots/plating"), stoneColor);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
 
     spriteReader.closeAll();
+    return CompletableFuture.completedFuture(null);
   }
 
   /** Gets the LCM of two ints */

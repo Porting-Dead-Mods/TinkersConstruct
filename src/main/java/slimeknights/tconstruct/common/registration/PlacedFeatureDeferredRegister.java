@@ -2,6 +2,9 @@ package slimeknights.tconstruct.common.registration;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.GeodeConfiguration;
@@ -19,7 +22,7 @@ import java.util.List;
 
 public class PlacedFeatureDeferredRegister extends DeferredRegisterWrapper<PlacedFeature> {
   public PlacedFeatureDeferredRegister(String modID) {
-    super(Registry.PLACED_FEATURE_REGISTRY, modID); // TODO: Idk where the Placed Feature Registry is stored
+    super(Registries.PLACED_FEATURE, modID);
   }
 
   /**
@@ -29,8 +32,14 @@ public class PlacedFeatureDeferredRegister extends DeferredRegisterWrapper<Place
    * @param placement  Placements
    * @return  Registry object
    */
-  public RegistryObject<PlacedFeature> register(String name, RegistryObject<? extends ConfiguredFeature<?,?>> feature, List<PlacementModifier> placement) {
-    return register.register(name, () -> new PlacedFeature(Holder.hackyErase(feature.getHolder().orElseThrow(() -> new IllegalStateException("Feature does not have a holder"))), List.copyOf(placement)));
+  public RegistryObject<PlacedFeature> register(String name, RegistryObject<? extends ConfiguredFeature<?, ?>> feature, List<PlacementModifier> placement) {
+    return register.register(name, () -> new PlacedFeature(
+      // Cast the holder to remove the wildcard
+      (Holder<ConfiguredFeature<?, ?>>) feature.getHolder().orElseThrow(
+        () -> new IllegalStateException("Feature does not have a holder")
+      ),
+      List.copyOf(placement)
+    ));
   }
 
   /**

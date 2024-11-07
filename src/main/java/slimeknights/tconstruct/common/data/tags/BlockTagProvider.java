@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.common.data.tags;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.VanillaBlockTagsProvider;
@@ -16,7 +17,6 @@ import slimeknights.mantle.registration.object.BuildingBlockObject;
 import slimeknights.mantle.registration.object.EnumObject;
 import slimeknights.mantle.registration.object.MetalItemObject;
 import slimeknights.mantle.registration.object.WoodBlockObject;
-import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.registration.GeodeItemObject;
 import slimeknights.tconstruct.common.registration.GeodeItemObject.BudSize;
@@ -36,6 +36,7 @@ import slimeknights.tconstruct.world.block.DirtType;
 import slimeknights.tconstruct.world.block.FoliageType;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -52,12 +53,12 @@ import static net.minecraftforge.common.Tags.Blocks.NEEDS_NETHERITE_TOOL;
 @SuppressWarnings({"unchecked", "SameParameterValue"})
 public class BlockTagProvider extends VanillaBlockTagsProvider {
 
-  public BlockTagProvider(DataGenerator generatorIn, ExistingFileHelper existingFileHelper) {
-    super(generatorIn, TConstruct.MOD_ID, existingFileHelper);
+  public BlockTagProvider(DataGenerator generatorIn, CompletableFuture<HolderLookup.Provider> lookup) {
+    super(generatorIn.getPackOutput(), lookup);
   }
 
   @Override
-  protected void addTags() {
+  protected void addTags(HolderLookup.Provider pProvider) {
     this.addCommon();
     this.addTools();
     this.addWorld();

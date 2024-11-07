@@ -25,6 +25,8 @@ public class RecolorSpriteTransformer implements ISpriteTransformer {
   @Getter
   private final IColorMapping colorMapping;
 
+  public RecolorSpriteTransformer(IColorMapping colorMapping) {this.colorMapping = colorMapping;}
+
   @Override
   public void transform(NativeImage image, boolean allowAnimated) {
     for (int x = 0; x < image.getWidth(); x++) {

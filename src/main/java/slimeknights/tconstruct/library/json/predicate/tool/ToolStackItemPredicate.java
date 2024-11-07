@@ -21,6 +21,8 @@ public class ToolStackItemPredicate extends ItemPredicate {
 
   private final IJsonPredicate<IToolStackView> predicate;
 
+  public ToolStackItemPredicate(IJsonPredicate<IToolStackView> predicate) {this.predicate = predicate;}
+
   public static ToolStackItemPredicate ofContext(IJsonPredicate<IToolContext> predicate) {
     return new ToolStackItemPredicate(ToolStackPredicate.context(predicate));
   }

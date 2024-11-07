@@ -5,6 +5,7 @@ import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -79,19 +80,19 @@ public class GlobalLootModifiersProvider extends GlobalLootModifierProvider {
     addLustrous("cobalt", false);
     addLustrous("netherite_scrap", false);
     for (SmelteryCompat compat : SmelteryCompat.values()) {
-      if (compat.isOre) {
-        addLustrous(compat.name, true);
+      if (compat.isOre()) {
+        addLustrous(compat.getName(), true);
       }
     }
   }
 
   /** Adds lustrous for an ore */
   private void addLustrous(String name, boolean optional) {
-    TagKey<Item> nuggets = TagKey.create(BuiltInRegistries.ITEM.key(), new ResourceLocation("forge", "nuggets/" + name));
+    TagKey<Item> nuggets = TagKey.create(Registries.ITEM, new ResourceLocation("forge", "nuggets/" + name));
     ResourceLocation ores = new ResourceLocation("forge", "ores/" + name);
     AddEntryLootModifier.Builder builder = AddEntryLootModifier.builder(TagPreferenceLootEntry.tagPreference(nuggets));
-    builder.addCondition(new BlockTagLootCondition(TagKey.create(BuiltInRegistries.BLOCK.key(), ores)))
-           .addCondition(new ContainsItemModifierLootCondition(Ingredient.of(TagKey.create(BuiltInRegistries.ITEM.key(), ores))).inverted());
+    builder.addCondition(new BlockTagLootCondition(TagKey.create(Registries.BLOCK, ores)))
+           .addCondition(new ContainsItemModifierLootCondition(Ingredient.of(TagKey.create(Registries.ITEM, ores))).inverted());
     if (optional) {
       builder.addCondition(new TagNotEmptyCondition<>(nuggets));
     }

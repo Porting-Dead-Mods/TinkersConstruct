@@ -1,7 +1,10 @@
 package slimeknights.tconstruct;
 
+import lombok.var;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -144,18 +147,20 @@ public class TConstruct {
   static void gatherData(final GatherDataEvent event) {
     DataGenerator datagenerator = event.getGenerator();
     ExistingFileHelper existingFileHelper = event.getExistingFileHelper();
+    var lookupProvider = event.getLookupProvider();
     boolean server = event.includeServer();
-    BlockTagProvider blockTags = new BlockTagProvider(datagenerator, existingFileHelper);
-    datagenerator.addProvider(server, new BlockTagProvider(datagenerator, existingFileHelper));
-    datagenerator.addProvider(server, new ItemTagProvider(datagenerator, blockTags, existingFileHelper));
-    datagenerator.addProvider(server, new FluidTagProvider(datagenerator, existingFileHelper));
-    datagenerator.addProvider(server, new EntityTypeTagProvider(datagenerator, existingFileHelper));
-    datagenerator.addProvider(server, new BlockEntityTypeTagProvider(datagenerator, existingFileHelper));
-    datagenerator.addProvider(server, new BiomeTagProvider(datagenerator, existingFileHelper));
-    datagenerator.addProvider(server, new EnchantmentTagProvider(datagenerator, existingFileHelper));
-    datagenerator.addProvider(server, new TConstructLootTableProvider(datagenerator));
-    datagenerator.addProvider(server, new AdvancementsProvider(datagenerator));
-    datagenerator.addProvider(server, new GlobalLootModifiersProvider(datagenerator));
+    // TODO: Fix this mess
+    BlockTagProvider blockTags = new BlockTagProvider(datagenerator, lookupProvider);
+    datagenerator.addProvider(server, new BlockTagProvider(datagenerator, lookupProvider));
+    datagenerator.addProvider(server, new ItemTagProvider(datagenerator, blockTags, lookupProvider));
+    datagenerator.addProvider(server, new FluidTagProvider(datagenerator, lookupProvider));
+    datagenerator.addProvider(server, new EntityTypeTagProvider(datagenerator, lookupProvider));
+    datagenerator.addProvider(server, new BlockEntityTypeTagProvider(datagenerator, lookupProvider));
+    datagenerator.addProvider(server, new BiomeTagProvider(datagenerator, lookupProvider));
+    datagenerator.addProvider(server, new EnchantmentTagProvider(datagenerator, lookupProvider));
+    datagenerator.addProvider(server, new TConstructLootTableProvider(datagenerator,lookupProvider));
+    datagenerator.addProvider(server, new AdvancementsProvider(datagenerator;,lookupProvider));
+    datagenerator.addProvider(server, new GlobalLootModifiersProvider(datagenerator,lookupProvider));
   }
 
   /** Shared behavior between item and block missing mappings */
@@ -180,14 +185,14 @@ public class TConstruct {
 
   /** Handles missing mappings of all types */
   private static void missingMappings(MissingMappingsEvent event) {
-    RegistrationHelper.handleMissingMappings(event, MOD_ID, Registry.BLOCK_REGISTRY, name -> {
+    RegistrationHelper.handleMissingMappings(event, MOD_ID, Registries.BLOCK, name -> {
       // no item form so we handle it directly
       if (name.equals("blood_fluid")) {
         return TinkerFluids.earthSlime.getBlock();
       }
       return missingBlock(name);
     });
-    RegistrationHelper.handleMissingMappings(event, MOD_ID, Registry.ITEM_REGISTRY, name -> switch (name) {
+    RegistrationHelper.handleMissingMappings(event, MOD_ID, Registries.ITEM, name -> switch (name) {
       // slings are modifiers now
       case "earth_slime_sling" -> TinkerTools.earthStaff.get();
       case "sky_slime_sling" -> TinkerTools.skyStaff.get();
@@ -209,13 +214,13 @@ public class TConstruct {
         yield block == null ? null : block.asItem();
       }
     });
-    RegistrationHelper.handleMissingMappings(event, MOD_ID, Registry.FLUID_REGISTRY, name -> switch (name) {
+    RegistrationHelper.handleMissingMappings(event, MOD_ID, Registries.FLUID, name -> switch (name) {
       case "blood" -> TinkerFluids.earthSlime.getStill();
       case "flowing_blood" -> TinkerFluids.earthSlime.getFlowing();
       default -> null;
     });
-    RegistrationHelper.handleMissingMappings(event, MOD_ID, Registry.ENTITY_TYPE_REGISTRY, name -> name.equals("earth_slime") ? EntityType.SLIME : null);
-    RegistrationHelper.handleMissingMappings(event, MOD_ID, Registry.MOB_EFFECT_REGISTRY, name -> switch (name) {
+    RegistrationHelper.handleMissingMappings(event, MOD_ID, Registries.ENTITY_TYPE, name -> name.equals("earth_slime") ? EntityType.SLIME : null);
+    RegistrationHelper.handleMissingMappings(event, MOD_ID, Registries.MOB_EFFECT, name -> switch (name) {
       case "momentum" -> TinkerModifiers.momentumEffect.get(ToolType.HARVEST);
       case "insatiable" -> TinkerModifiers.insatiableEffect.get(ToolType.MELEE);
       default -> null;

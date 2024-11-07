@@ -14,15 +14,14 @@ import java.util.function.Consumer;
  */
 public abstract class BaseRecipeProvider extends RecipeProvider implements IConditionBuilder, IRecipeHelper {
   public BaseRecipeProvider(DataGenerator generator) {
-    super(generator);
+    super(generator.getPackOutput());
     TConstruct.sealTinkersClass(this, "BaseRecipeProvider", "BaseRecipeProvider is trivial to recreate and directly extending can lead to addon recipes polluting our namespace.");
   }
 
   @Override
-  protected abstract void buildCraftingRecipes(Consumer<FinishedRecipe> consumer);
+  protected void buildRecipes(Consumer<FinishedRecipe> consumer) {
 
-  @Override
-  public abstract String getName();
+  }
 
   @Override
   public String getModId() {

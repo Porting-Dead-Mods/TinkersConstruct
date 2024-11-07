@@ -9,6 +9,7 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.GsonHelper;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import slimeknights.tconstruct.TConstruct;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,6 +23,11 @@ import java.util.NoSuchElementException;
 public class DataGenSpriteReader extends AbstractSpriteReader {
   private final ExistingFileHelper existingFileHelper;
   private final String folder;
+
+  public DataGenSpriteReader(ExistingFileHelper existingFileHelper, String folder) {
+    this.existingFileHelper = existingFileHelper;
+    this.folder = folder;
+  }
 
   @Override
   public boolean exists(ResourceLocation path) {
@@ -41,7 +47,7 @@ public class DataGenSpriteReader extends AbstractSpriteReader {
       openedImages.add(image);
       return image;
     } catch (IOException|NoSuchElementException e) {
-      log.error("Failed to read image at {}", path);
+      TConstruct.LOG.error("Failed to read image at {}", path);
       throw e;
     }
   }

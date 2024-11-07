@@ -89,7 +89,7 @@ import static slimeknights.tconstruct.common.TinkerTags.Items.WORN_ARMOR;
 @SuppressWarnings("unchecked")
 public class ItemTagProvider extends ItemTagsProvider {
 
-  public ItemTagProvider(DataGenerator generatorIn, BlockTagsProvider blockTagProvider, ExistingFileHelper existingFileHelper) {
+  public ItemTagProvider(DataGenerator generatorIn, BlockTagProvider blockTagProvider, ExistingFileHelper existingFileHelper) {
     super(generatorIn, blockTagProvider, TConstruct.MOD_ID, existingFileHelper);
   }
 
