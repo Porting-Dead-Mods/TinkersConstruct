@@ -9,9 +9,10 @@
 plugins {
     id 'eclipse'
     id 'maven-publish'
-    id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
     id 'io.freefair.lombok' version '8.6'
+    id 'java'
 }
 //apply plugin: 'maven'
 
@@ -45,11 +46,19 @@ repositories {
      flatDir {
          dir '../Mantle/build/libs'
      }
+    flatDir {
+        dir './localdeps'
+    }
 }
 
 group = 'slimeknights.tconstruct'
 archivesBaseName = 'TinkersConstruct'
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
 
 // sets version to the slimeKnights version format
 task buildInfo {
@@ -96,7 +105,7 @@ sourceSets {
 }
 
 minecraft {
-    mappings channel: 'parchment', version: "${parchment_version}-${minecraft_version}"
+    mappings channel: 'official', version: "${minecraft_version}"
 
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
@@ -299,7 +308,6 @@ jar.finalizedBy('reobfJar')
 
 task sourcesJar(type: Jar) {
     from sourceSets.main.allJava
-    classifier = 'sources'
 }
 
 artifacts {

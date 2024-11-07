@@ -96,6 +96,11 @@ public class TinkerDataCapability {
     public String toString() {
       return "TinkerDataKey{" + id + '}';
     }
+
+    @Override
+    public ResourceLocation getId() {
+      return id;
+    }
   }
 
   /** Extension key that can automatically create an instance if missing */
