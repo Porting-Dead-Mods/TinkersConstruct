@@ -5,7 +5,8 @@ import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.core.Registry;
-import net.minecraft.data.loot.BlockLoot;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.loot.packs.VanillaBlockLoot;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ItemLike;
@@ -56,16 +57,20 @@ import javax.annotation.Nonnull;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class BlockLootTableProvider extends BlockLoot {
+public class BlockLootTableProvider extends VanillaBlockLoot {
+
+  private static final float[] NORMAL_LEAVES_STICK_CHANCES = new float[]{0.02F, 0.022222223F, 0.025F, 0.033333335F, 0.1F};
+  private static final LootItemCondition.Builder HAS_SHEARS_OR_SILK_TOUCH = HAS_SHEARS.or(HAS_SILK_TOUCH);
+  private static final LootItemCondition.Builder HAS_NO_SHEARS_OR_SILK_TOUCH = HAS_SHEARS_OR_SILK_TOUCH.invert();
+
   @Nonnull
   @Override
   protected Iterable<Block> getKnownBlocks() {
     return ForgeRegistries.BLOCKS.getValues().stream()
-                                 .filter((block) -> TConstruct.MOD_ID.equals(Registry.BLOCK.getKey(block).getNamespace()))
+                                 .filter((block) -> TConstruct.MOD_ID.equals(BuiltInRegistries.BLOCK.getKey(block).getNamespace()))
                                  .collect(Collectors.toList());
   }
 
-  @Override
   protected void addTables() {
     this.addCommon();
     this.addDecorative();
@@ -341,7 +346,7 @@ public class BlockLootTableProvider extends BlockLoot {
    */
   private void registerBuildingLootTables(BuildingBlockObject object) {
     this.dropSelf(object.get());
-    this.add(object.getSlab(), BlockLoot::createSlabItemTable);
+    this.add(object.getSlab(), VanillaBlockLoot::createSlabItemTable); // TODO: Slab - Access got changed
     this.dropSelf(object.getStairs());
   }
 
@@ -373,7 +378,7 @@ public class BlockLootTableProvider extends BlockLoot {
     this.dropSelf(object.getStrippedWood());
     // door
     this.dropSelf(object.getFenceGate());
-    this.add(object.getDoor(), BlockLoot::createDoorTable);
+    this.add(object.getDoor(), VanillaBlockLoot::createDoorTable); // TODO: Door - Access got changed
     this.dropSelf(object.getTrapdoor());
     // redstone
     this.dropSelf(object.getPressurePlate());
