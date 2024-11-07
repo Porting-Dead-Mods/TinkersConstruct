@@ -35,12 +35,13 @@ public class TConstructLootTableProvider extends LootTableProvider {
     super(pOutput, pRequiredTables, pSubProviders);
   }
 
-
+  // TODO: Fix this too
+  /*
   @Override
-  protected List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootContextParamSet>> getTables() {
+  public List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootContextParamSet>> getTables() {
     return lootTables;
   }
-
+   */
 
   @Override
   protected void validate(Map<ResourceLocation, LootTable> map, ValidationContext validationtracker) {
