@@ -41,6 +41,7 @@ public class TConstructLootTableProvider extends LootTableProvider {
     return lootTables;
   }
 
+
   @Override
   protected void validate(Map<ResourceLocation, LootTable> map, ValidationContext validationtracker) {
     map.forEach((loc, table) -> {
