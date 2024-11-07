@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.library;
 
 import net.minecraft.resources.ResourceLocation;
-import slimeknights.mantle.command.BookTestCommand;
+//import slimeknights.mantle.command.BookTestCommand;
 import slimeknights.tconstruct.TConstruct;
 
 /** This class can safely be accessed serverside for book IDs */
@@ -13,13 +13,14 @@ public class TinkerBookIDs {
   public static final ResourceLocation FANTASTIC_FOUNDRY_ID = TConstruct.getResource("fantastic_foundry");
   public static final ResourceLocation ENCYCLOPEDIA_ID = TConstruct.getResource("encyclopedia");
 
-  /** Regsiters suggestions with the mantle command */
-  public static void registerCommandSuggestion() {
-    BookTestCommand.addBookSuggestion(MATERIALS_BOOK_ID);
-    BookTestCommand.addBookSuggestion(MIGHTY_SMELTING_ID);
-    BookTestCommand.addBookSuggestion(PUNY_SMELTING_ID);
-    BookTestCommand.addBookSuggestion(TINKERS_GADGETRY_ID);
-    BookTestCommand.addBookSuggestion(FANTASTIC_FOUNDRY_ID);
-    BookTestCommand.addBookSuggestion(ENCYCLOPEDIA_ID);
-  }
+  // TODO: TBI - Book Command
+//  /** Regsiters suggestions with the mantle command */
+//  public static void registerCommandSuggestion() {
+//    BookTestCommand.addBookSuggestion(MATERIALS_BOOK_ID);
+//    BookTestCommand.addBookSuggestion(MIGHTY_SMELTING_ID);
+//    BookTestCommand.addBookSuggestion(PUNY_SMELTING_ID);
+//    BookTestCommand.addBookSuggestion(TINKERS_GADGETRY_ID);
+//    BookTestCommand.addBookSuggestion(FANTASTIC_FOUNDRY_ID);
+//    BookTestCommand.addBookSuggestion(ENCYCLOPEDIA_ID);
+//  }
 }

@@ -9,10 +9,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Item.Properties;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.Material;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -21,7 +21,6 @@ import org.apache.logging.log4j.Logger;
 import slimeknights.mantle.item.BlockTooltipItem;
 import slimeknights.mantle.registration.object.EnumObject;
 import slimeknights.mantle.registration.object.ItemObject;
-import slimeknights.mantle.util.SupplierCreativeTab;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerModule;
 import slimeknights.tconstruct.gadgets.block.FoodCakeBlock;
@@ -52,14 +51,14 @@ import java.util.function.Function;
 @SuppressWarnings("unused")
 public final class TinkerGadgets extends TinkerModule {
   /** Tab for all special tools added by the mod */
-  public static final CreativeModeTab TAB_GADGETS = new SupplierCreativeTab(TConstruct.MOD_ID, "gadgets", () -> new ItemStack(TinkerGadgets.itemFrame.get(FrameType.CLEAR)));
+  // public static final CreativeModeTab TAB_GADGETS = new SupplierCreativeTab(TConstruct.MOD_ID, "gadgets", () -> new ItemStack(TinkerGadgets.itemFrame.get(FrameType.CLEAR))); TODO: Tabs
   static final Logger log = Util.getLogger("tinker_gadgets");
 
   /*
    * Block base properties
    */
-  private static final Item.Properties GADGET_PROPS = new Item.Properties().tab(TAB_GADGETS);
-  private static final Item.Properties UNSTACKABLE_PROPS = new Item.Properties().tab(TAB_GADGETS).stacksTo(1);
+  private static final Item.Properties GADGET_PROPS = new Item.Properties(); //.tab(TAB_GADGETS); TODO: Tabs
+  private static final Item.Properties UNSTACKABLE_PROPS = new Item.Properties(); // .tab(TAB_GADGETS).stacksTo(1); TODO: Tabs
   private static final Function<Block,? extends BlockItem> DEFAULT_BLOCK_ITEM = (b) -> new BlockItem(b, GADGET_PROPS);
   private static final Function<Block,? extends BlockItem> TOOLTIP_BLOCK_ITEM = (b) -> new BlockTooltipItem(b, GADGET_PROPS);
   private static final Function<Block,? extends BlockItem> UNSTACKABLE_BLOCK_ITEM = (b) -> new BlockTooltipItem(b, UNSTACKABLE_PROPS);
@@ -67,12 +66,12 @@ public final class TinkerGadgets extends TinkerModule {
   /*
    * Blocks
    */
-  public static final ItemObject<PunjiBlock> punji = BLOCKS.register("punji", () -> new PunjiBlock(builder(Material.PLANT, SoundType.GRASS).strength(3.0F).speedFactor(0.4F).noOcclusion()), TOOLTIP_BLOCK_ITEM);
+  public static final ItemObject<PunjiBlock> punji = BLOCKS.register("punji", () -> new PunjiBlock(builder(Blocks.FERN, SoundType.GRASS).strength(3.0F).speedFactor(0.4F).noOcclusion()), TOOLTIP_BLOCK_ITEM);
 
   /*
    * Items
    */
-  public static final ItemObject<PiggyBackPackItem> piggyBackpack = ITEMS.register("piggy_backpack", () -> new PiggyBackPackItem(new Properties().tab(TinkerGadgets.TAB_GADGETS).stacksTo(16)));
+  public static final ItemObject<PiggyBackPackItem> piggyBackpack = ITEMS.register("piggy_backpack", () -> new PiggyBackPackItem(new Properties().stacksTo(16))); // .tab(TinkerGadgets.TAB_GADGETS) TODO: Tabs
   public static final EnumObject<FrameType,FancyItemFrameItem> itemFrame = ITEMS.registerEnum(FrameType.values(), "item_frame", (type) -> new FancyItemFrameItem(GADGET_PROPS, (world, pos, dir) -> new FancyItemFrameEntity(world, pos, dir, type)));
 
   // throwballs
@@ -80,12 +79,12 @@ public final class TinkerGadgets extends TinkerModule {
   public static final ItemObject<EFLNItem> efln = ITEMS.register("efln_ball", EFLNItem::new);
 
   // foods
-  private static final BlockBehaviour.Properties CAKE = builder(Material.CAKE, SoundType.WOOL).strength(0.5F);
+  private static final BlockBehaviour.Properties CAKE = builder(Blocks.CAKE, SoundType.WOOL).strength(0.5F);
   public static final EnumObject<FoliageType,FoodCakeBlock> cake = BLOCKS.registerEnum(FoliageType.values(), "cake", type -> new FoodCakeBlock(CAKE, TinkerFood.getCake(type)), UNSTACKABLE_BLOCK_ITEM);
   public static final ItemObject<FoodCakeBlock> magmaCake = BLOCKS.register("magma_cake", () -> new FoodCakeBlock(CAKE, TinkerFood.MAGMA_CAKE), UNSTACKABLE_BLOCK_ITEM);
 
   // Shurikens
-  private static final Item.Properties THROWABLE_PROPS = new Item.Properties().stacksTo(16).tab(TAB_GADGETS);
+  private static final Item.Properties THROWABLE_PROPS = new Item.Properties().stacksTo(16); //.tab(TAB_GADGETS); TODO: Tabs
   public static final ItemObject<ShurikenItem> quartzShuriken = ITEMS.register("quartz_shuriken", () -> new ShurikenItem(THROWABLE_PROPS, QuartzShurikenEntity::new));
   public static final ItemObject<ShurikenItem> flintShuriken = ITEMS.register("flint_shuriken", () -> new ShurikenItem(THROWABLE_PROPS, FlintShurikenEntity::new));
 

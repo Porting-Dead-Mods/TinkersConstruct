@@ -2,6 +2,7 @@ package slimeknights.tconstruct.common;
 
 import lombok.Getter;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -77,18 +78,18 @@ public enum Sounds {
 
   Sounds(String name) {
     ResourceLocation registryName = TConstruct.getResource(name);
-    sound = new SoundEvent(registryName);
+    sound = SoundEvent.createVariableRangeEvent(registryName);
   }
 
   Sounds() {
     String name = name().toLowerCase(Locale.US);
     ResourceLocation registryName = TConstruct.getResource(name);
-    sound = new SoundEvent(registryName);
+    sound = SoundEvent.createVariableRangeEvent(registryName);
   }
 
   @SubscribeEvent
   public static void registerSounds(RegisterEvent event) {
-    if (event.getRegistryKey() == Registry.SOUND_EVENT_REGISTRY) {
+    if (event.getRegistryKey() == BuiltInRegistries.SOUND_EVENT) {
       for (Sounds sound : values()) {
         ForgeRegistries.SOUND_EVENTS.register(sound.sound.getLocation(), sound.getSound());
       }

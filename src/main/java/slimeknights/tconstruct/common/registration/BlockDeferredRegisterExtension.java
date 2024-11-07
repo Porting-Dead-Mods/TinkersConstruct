@@ -8,8 +8,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
 import net.minecraftforge.registries.RegistryObject;
 import slimeknights.mantle.registration.deferred.BlockDeferredRegister;
 import slimeknights.mantle.registration.object.EnumObject;

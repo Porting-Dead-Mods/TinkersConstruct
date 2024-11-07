@@ -1,5 +1,6 @@
 package slimeknights.tconstruct;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.network.chat.Component;
@@ -11,6 +12,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.data.BlockTagsProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -115,7 +117,7 @@ public class TConstruct {
     TinkerNetwork.setup();
     TinkerTags.init();
     // init client logic
-    TinkerBookIDs.registerCommandSuggestion();
+    // TinkerBookIDs.registerCommandSuggestion(); TODO: Book Fixing
     DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> TinkerClient::onConstruct);
 
     // compat
@@ -144,7 +146,7 @@ public class TConstruct {
     ExistingFileHelper existingFileHelper = event.getExistingFileHelper();
     boolean server = event.includeServer();
     BlockTagProvider blockTags = new BlockTagProvider(datagenerator, existingFileHelper);
-    datagenerator.addProvider(server, blockTags);
+    datagenerator.addProvider(server, new BlockTagProvider(datagenerator, existingFileHelper));
     datagenerator.addProvider(server, new ItemTagProvider(datagenerator, blockTags, existingFileHelper));
     datagenerator.addProvider(server, new FluidTagProvider(datagenerator, existingFileHelper));
     datagenerator.addProvider(server, new EntityTypeTagProvider(datagenerator, existingFileHelper));
