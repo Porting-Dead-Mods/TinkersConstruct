@@ -2,7 +2,7 @@ package slimeknights.tconstruct.common.data.tags;
 
 import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.tags.BlockTagsProvider;
+import net.minecraft.data.tags.VanillaBlockTagsProvider;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
@@ -50,7 +50,7 @@ import static net.minecraftforge.common.Tags.Blocks.NEEDS_GOLD_TOOL;
 import static net.minecraftforge.common.Tags.Blocks.NEEDS_NETHERITE_TOOL;
 
 @SuppressWarnings({"unchecked", "SameParameterValue"})
-public class BlockTagProvider extends BlockTagsProvider {
+public class BlockTagProvider extends VanillaBlockTagsProvider {
 
   public BlockTagProvider(DataGenerator generatorIn, ExistingFileHelper existingFileHelper) {
     super(generatorIn, TConstruct.MOD_ID, existingFileHelper);
@@ -99,7 +99,7 @@ public class BlockTagProvider extends BlockTagsProvider {
     // impermeable for all glass
     TagAppender<Block> impermeable = tag(BlockTags.IMPERMEABLE);
     TagAppender<Block> silicaGlass = tag(Tags.Blocks.GLASS_SILICA);
-    impermeable.add(TinkerCommons.clearGlass.get(), TinkerCommons.soulGlass.get(), TinkerCommons.clearTintedGlass.get(),
+    impermeable.add(TinkerCommons.clearGlass, TinkerCommons.soulGlass.get(), TinkerCommons.clearTintedGlass.get(),
                     TinkerSmeltery.searedGlass.get(), TinkerSmeltery.searedSoulGlass.get(), TinkerSmeltery.searedTintedGlass.get(),
                     TinkerSmeltery.scorchedGlass.get(), TinkerSmeltery.scorchedSoulGlass.get(), TinkerSmeltery.scorchedTintedGlass.get());
     silicaGlass.add(TinkerCommons.clearGlass.get());
