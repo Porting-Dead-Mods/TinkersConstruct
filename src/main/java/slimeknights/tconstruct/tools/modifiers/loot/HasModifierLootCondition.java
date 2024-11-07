@@ -21,6 +21,8 @@ import slimeknights.tconstruct.tools.TinkerModifiers;
 public class HasModifierLootCondition implements LootItemCondition {
   private final ModifierId modifier;
 
+  public HasModifierLootCondition(ModifierId modifier) {this.modifier = modifier;}
+
   @Override
   public LootItemConditionType getType() {
     return TinkerModifiers.hasModifierLootCondition.get();

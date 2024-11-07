@@ -4,6 +4,7 @@ import net.minecraft.advancements.critereon.EntityEquipmentPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -41,7 +42,7 @@ import slimeknights.tconstruct.tools.modifiers.loot.ModifierBonusLootFunction;
 
 public class GlobalLootModifiersProvider extends GlobalLootModifierProvider {
   public GlobalLootModifiersProvider(DataGenerator gen) {
-    super(gen, TConstruct.MOD_ID);
+    super(gen.getPackOutput(), TConstruct.MOD_ID);
   }
 
   @Override
@@ -78,19 +79,19 @@ public class GlobalLootModifiersProvider extends GlobalLootModifierProvider {
     addLustrous("cobalt", false);
     addLustrous("netherite_scrap", false);
     for (SmelteryCompat compat : SmelteryCompat.values()) {
-      if (compat.isOre()) {
-        addLustrous(compat.getName(), true);
+      if (compat.isOre) {
+        addLustrous(compat.name, true);
       }
     }
   }
 
   /** Adds lustrous for an ore */
   private void addLustrous(String name, boolean optional) {
-    TagKey<Item> nuggets = TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation("forge", "nuggets/" + name));
+    TagKey<Item> nuggets = TagKey.create(BuiltInRegistries.ITEM.key(), new ResourceLocation("forge", "nuggets/" + name));
     ResourceLocation ores = new ResourceLocation("forge", "ores/" + name);
     AddEntryLootModifier.Builder builder = AddEntryLootModifier.builder(TagPreferenceLootEntry.tagPreference(nuggets));
-    builder.addCondition(new BlockTagLootCondition(TagKey.create(Registry.BLOCK_REGISTRY, ores)))
-           .addCondition(new ContainsItemModifierLootCondition(Ingredient.of(TagKey.create(Registry.ITEM_REGISTRY, ores))).inverted());
+    builder.addCondition(new BlockTagLootCondition(TagKey.create(BuiltInRegistries.BLOCK.key(), ores)))
+           .addCondition(new ContainsItemModifierLootCondition(Ingredient.of(TagKey.create(BuiltInRegistries.ITEM.key(), ores))).inverted());
     if (optional) {
       builder.addCondition(new TagNotEmptyCondition<>(nuggets));
     }

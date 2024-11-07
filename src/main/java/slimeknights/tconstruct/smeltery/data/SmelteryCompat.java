@@ -39,15 +39,15 @@ public enum SmelteryCompat {
   REFINED_OBSIDIAN (TinkerFluids.moltenRefinedObsidian, false);
 
   @Getter
-  private final String name = this.name().toLowerCase(Locale.US);
-  private final FluidObject<? extends ForgeFlowingFluid> fluid;
+  public final String name = this.name().toLowerCase(Locale.US);
+  public final FluidObject<? extends ForgeFlowingFluid> fluid;
   @Getter
-  private final boolean isOre;
+  public final boolean isOre;
   @Accessors(fluent = true)
   @Getter
-  private final boolean hasDust;
+  public final boolean hasDust;
   @Getter
-  private final Byproduct[] byproducts;
+  public final Byproduct[] byproducts;
 
   SmelteryCompat(FluidObject<? extends ForgeFlowingFluid> fluid, boolean hasDust) {
     this.fluid = fluid;

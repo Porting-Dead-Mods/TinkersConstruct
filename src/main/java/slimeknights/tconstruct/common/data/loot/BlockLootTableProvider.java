@@ -5,8 +5,12 @@ import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.core.Registry;
-import net.minecraft.data.loot.BlockLoot;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -53,20 +57,27 @@ import slimeknights.tconstruct.world.block.DirtType;
 import slimeknights.tconstruct.world.block.FoliageType;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class BlockLootTableProvider extends BlockLoot {
+public class BlockLootTableProvider extends BlockLootSubProvider {
+
+  protected BlockLootTableProvider(Set<Item> p_249153_, FeatureFlagSet p_251215_) {
+    super(Collections.emptySet(), FeatureFlags.VANILLA_SET);
+  }
+
   @Nonnull
   @Override
   protected Iterable<Block> getKnownBlocks() {
     return ForgeRegistries.BLOCKS.getValues().stream()
-                                 .filter((block) -> TConstruct.MOD_ID.equals(Registry.BLOCK.getKey(block).getNamespace()))
+                                 .filter((block) -> TConstruct.MOD_ID.equals(BuiltInRegistries.BLOCK.getKey(block).getNamespace()))
                                  .collect(Collectors.toList());
   }
 
   @Override
-  protected void addTables() {
+  protected void generate() {
     this.addCommon();
     this.addDecorative();
     this.addGadgets();
@@ -314,11 +325,11 @@ public class BlockLootTableProvider extends BlockLoot {
     return createSelfDropDispatchTable(block, SILK_TOUCH_OR_SHEARS, alternativeLootEntry);
   }
 
-  private static LootTable.Builder dropSapling(Block blockIn, Block saplingIn, float... fortuneIn) {
+  private LootTable.Builder dropSapling(Block blockIn, Block saplingIn, float... fortuneIn) {
     return droppingSilkOrShears(blockIn, applyExplosionCondition(blockIn, LootItem.lootTableItem(saplingIn)).when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.BLOCK_FORTUNE, fortuneIn)));
   }
 
-  private static LootTable.Builder randomDropSlimeBallOrSapling(FoliageType foliageType, Block blockIn, Block sapling, float... fortuneIn) {
+  private LootTable.Builder randomDropSlimeBallOrSapling(FoliageType foliageType, Block blockIn, Block sapling, float... fortuneIn) {
     LootTable.Builder builder = dropSapling(blockIn, sapling, fortuneIn);
     SlimeType slime = foliageType.asSlime();
     if (slime != null) {
@@ -331,7 +342,7 @@ public class BlockLootTableProvider extends BlockLoot {
     return builder;
   }
 
-  private static LootTable.Builder droppingWithFunctions(Block block, Function<LootItem.Builder<?>,LootItem.Builder<?>> mapping) {
+  private LootTable.Builder droppingWithFunctions(Block block, Function<LootItem.Builder<?>, LootItem.Builder<?>> mapping) {
     return LootTable.lootTable().withPool(applyExplosionCondition(block, LootPool.lootPool().setRolls(ConstantValue.exactly(1)).add(mapping.apply(LootItem.lootTableItem(block)))));
   }
 
@@ -341,7 +352,8 @@ public class BlockLootTableProvider extends BlockLoot {
    */
   private void registerBuildingLootTables(BuildingBlockObject object) {
     this.dropSelf(object.get());
-    this.add(object.getSlab(), BlockLoot::createSlabItemTable);
+    // TODO: Find a fix for this
+    // this.add(object.getSlab(), BlockLootSubProvider::createSlabItemTable);
     this.dropSelf(object.getStairs());
   }
 
@@ -371,18 +383,16 @@ public class BlockLootTableProvider extends BlockLoot {
     this.dropSelf(object.getStrippedLog());
     this.dropSelf(object.getWood());
     this.dropSelf(object.getStrippedWood());
-    // door
     this.dropSelf(object.getFenceGate());
-    this.add(object.getDoor(), BlockLoot::createDoorTable);
+    // TODO: Find a fix for this
+    //this.add(object.getDoor(), BlockLootTableProvider::createDoorTable);
     this.dropSelf(object.getTrapdoor());
-    // redstone
     this.dropSelf(object.getPressurePlate());
     this.dropSelf(object.getButton());
-    // sign
     this.dropSelf(object.getSign());
   }
 
-  private static Function<Block, LootTable.Builder> ADD_TABLE = block -> droppingWithFunctions(block, (builder) ->
+  private final Function<Block, LootTable.Builder> ADD_TABLE = block -> droppingWithFunctions(block, (builder) ->
     builder.apply(CopyNameFunction.copyName(CopyNameFunction.NameSource.BLOCK_ENTITY)).apply(RetexturedLootFunction::new));
 
   /** Registers a block that drops with its own texture stored in NBT */
