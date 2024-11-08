@@ -42,6 +42,7 @@ import slimeknights.tconstruct.common.data.tags.EnchantmentTagProvider;
 import slimeknights.tconstruct.common.data.tags.EntityTypeTagProvider;
 import slimeknights.tconstruct.common.data.tags.FluidTagProvider;
 import slimeknights.tconstruct.common.data.tags.ItemTagProvider;
+import slimeknights.tconstruct.common.data.tags.TinkerDamageSourceProvider;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
 import slimeknights.tconstruct.fluids.TinkerFluids;
 import slimeknights.tconstruct.gadgets.TinkerGadgets;
@@ -158,9 +159,10 @@ public class TConstruct {
     datagenerator.addProvider(server, new BlockEntityTypeTagProvider(datagenerator, lookupProvider));
     datagenerator.addProvider(server, new BiomeTagProvider(datagenerator, lookupProvider));
     datagenerator.addProvider(server, new EnchantmentTagProvider(datagenerator, lookupProvider));
-    datagenerator.addProvider(server, new TConstructLootTableProvider(datagenerator,lookupProvider));
-    datagenerator.addProvider(server, new AdvancementsProvider(datagenerator;,lookupProvider));
+    datagenerator.addProvider(server, new TConstructLootTableProvider(datagenerator));
+    datagenerator.addProvider(server, new AdvancementsProvider(datagenerator,lookupProvider));
     datagenerator.addProvider(server, new GlobalLootModifiersProvider(datagenerator,lookupProvider));
+    datagenerator.addProvider(server, new TinkerDamageSourceProvider(datagenerator,lookupProvider));
   }
 
   /** Shared behavior between item and block missing mappings */

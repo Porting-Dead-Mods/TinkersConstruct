@@ -35,6 +35,13 @@ public class TableModel implements IUnbakedGeometry<TableModel> {
   private final Set<String> retextured;
   private final List<ModelItem> items;
 
+  /* TODO: Fix this
+   @Override
+  public Collection<Material> getMaterials(IGeometryBakingContext owner, Function<ResourceLocation,UnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
+    return this.model.getMaterials(owner, modelGetter, missingTextureErrors);
+  }
+   */
+
   @Override
   public BakedModel bake(IGeometryBakingContext owner, ModelBaker bakery, Function<Material,TextureAtlasSprite> spriteGetter, ModelState transform, ItemOverrides overrides, ResourceLocation location) {
     BakedModel baked = this.model.bake(owner, bakery, spriteGetter, transform, overrides, location);

@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.common.data.tags;
 
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.BiomeTagsProvider;
@@ -29,8 +30,8 @@ import static net.minecraft.world.level.biome.Biomes.SMALL_END_ISLANDS;
 public class BiomeTagProvider extends BiomeTagsProvider {
 
 
-  public BiomeTagProvider(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pProvider) {
-    super(pOutput, pProvider);
+  public BiomeTagProvider(DataGenerator pOutput, CompletableFuture<HolderLookup.Provider> pProvider) {
+    super(pOutput.getPackOutput(),pProvider);
   }
 
   @Override

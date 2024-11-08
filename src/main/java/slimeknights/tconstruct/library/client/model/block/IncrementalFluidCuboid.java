@@ -1,13 +1,13 @@
 package slimeknights.tconstruct.library.client.model.block;
 
 import com.google.gson.JsonObject;
-import com.mojang.math.Vector3f;
 import lombok.Getter;
 import net.minecraft.client.renderer.block.model.BlockElement;
 import net.minecraft.client.renderer.block.model.BlockElementFace;
 import net.minecraft.client.renderer.block.model.BlockFaceUV;
 import net.minecraft.core.Direction;
 import net.minecraft.util.GsonHelper;
+import org.joml.Vector3f;
 import slimeknights.mantle.client.model.fluid.FluidCuboid;
 import slimeknights.mantle.client.model.util.ModelHelper;
 
@@ -31,38 +31,45 @@ public class IncrementalFluidCuboid extends FluidCuboid {
    * @param gas     If true, renders upside down
    * @return  Fluid part
    */
+  /**
+   * Gets the fluid part for this incremental cuboid.
+   * @param amount  Fluid amount.
+   * @param gas     If true, renders upside down.
+   * @return  Fluid part.
+   */
   @SuppressWarnings("WeakerAccess")
   public BlockElement getPart(int amount, boolean gas) {
     // set cube height based on stack amount
     Vector3f from = getFrom();
     Vector3f to = getTo();
-    // gas renders upside down
     float minY = from.y();
     float maxY = to.y();
+
+    // Calculate new Y values based on whether it's a gas
     if (gas) {
-      from = from.copy();
-      from.setY(maxY + (amount * (minY - maxY) / increments));
+      float newY = maxY + (amount * (minY - maxY) / increments);
+      from = new Vector3f(from.x(), newY, from.z());
     } else {
-      to = to.copy();
-      to.setY(minY + (amount * (maxY - minY) / increments));
+      float newY = minY + (amount * (maxY - minY) / increments);
+      to = new Vector3f(to.x(), newY, to.z());
     }
 
     // create faces based on face data
-    Map<Direction,BlockElementFace> faces = new EnumMap<>(Direction.class);
+    Map<Direction, BlockElementFace> faces = new EnumMap<>(Direction.class);
     for (Entry<Direction, FluidFace> entry : this.getFaces().entrySet()) {
-      // only add the face if requested
       Direction dir = entry.getKey();
       FluidFace face = entry.getValue();
-      // calculate in flowing and rotations
       boolean isFlowing = face.isFlowing();
+
       faces.put(dir, new BlockElementFace(
         null, 0, isFlowing ? "flowing_fluid" : "fluid",
-        getFaceUvs(from ,to, dir, face.rotation(), isFlowing ? 0.5f : 1f)));
+        getFaceUvs(from, to, dir, face.rotation(), isFlowing ? 0.5f : 1f)
+      ));
     }
 
-    // create the part with the fluid
-    return new BlockElement(from, to, faces, null, false);
+    return new BlockElement(from, to, faces, null, false);  // Adjusted for updated parameters.
   }
+
 
   /**
    * Creates a block part UV based on the given block dimensions

@@ -47,6 +47,7 @@ import slimeknights.tconstruct.smeltery.block.entity.tank.IDisplayFluidListener;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.BitSet;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +74,13 @@ public class FluidTextureModel implements IUnbakedGeometry<FluidTextureModel> {
     }
     return name;
   }
+
+  /* TODO: Fix this
+  @Override
+  public Collection<Material> getMaterials(IGeometryBakingContext owner, Function<ResourceLocation,UnbakedModel> modelGetter, Set<Pair<String,String>> missingTextureErrors) {
+    return model.getMaterials(owner, modelGetter, missingTextureErrors);
+  }
+   */
 
   @Override
   public BakedModel bake(IGeometryBakingContext owner, ModelBaker bakery, Function<Material,TextureAtlasSprite> spriteGetter, ModelState transform, ItemOverrides overrides, ResourceLocation modelLocation) {

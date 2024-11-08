@@ -2,6 +2,7 @@ package slimeknights.tconstruct.common.data.loot;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.resources.ResourceLocation;
@@ -25,23 +26,13 @@ public class TConstructLootTableProvider extends LootTableProvider {
 
   private LootTableProvider x;
 
-  private final List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootContextParamSet>> lootTables = ImmutableList.of(
-    Pair.of((Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>) new BlockLootTableProvider(Collections.emptySet(), FeatureFlags.VANILLA_SET), LootContextParamSets.BLOCK),
-    Pair.of((Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>) new AdvancementLootTableProvider(), LootContextParamSets.ADVANCEMENT_REWARD),
-    Pair.of((Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>) new EntityLootTableProvider(FeatureFlagSet.of()), LootContextParamSets.ENTITY)
-  );
-
-  public TConstructLootTableProvider(PackOutput pOutput, Set<ResourceLocation> pRequiredTables, List<SubProviderEntry> pSubProviders) {
-    super(pOutput, pRequiredTables, pSubProviders);
+  public TConstructLootTableProvider(DataGenerator pOutput) {
+    super(pOutput.getPackOutput(), Set.of(), List.of(
+      new SubProviderEntry(BlockLootTableProvider::new, LootContextParamSets.BLOCK),
+      new SubProviderEntry(AdvancementLootTableProvider::new, LootContextParamSets.ADVANCEMENT_REWARD),
+      new SubProviderEntry(EntityLootTableProvider::new, LootContextParamSets.ENTITY)
+    ));
   }
-
-  // TODO: Fix this too
-  /*
-  @Override
-  public List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootContextParamSet>> getTables() {
-    return lootTables;
-  }
-   */
 
   @Override
   protected void validate(Map<ResourceLocation, LootTable> map, ValidationContext validationtracker) {

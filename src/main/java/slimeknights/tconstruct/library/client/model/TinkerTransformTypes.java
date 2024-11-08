@@ -1,6 +1,5 @@
 package slimeknights.tconstruct.library.client.model;
 
-import net.minecraft.client.renderer.block.model.ItemTransforms.TransformType;
 import net.minecraft.world.item.ItemDisplayContext;
 import slimeknights.tconstruct.TConstruct;
 
@@ -27,9 +26,6 @@ public class TinkerTransformTypes {
   /** Creates a transform type */
   private static ItemDisplayContext create(String name, ItemDisplayContext fallback) {
     String key = "TCONSTRUCT_" + name.toUpperCase(Locale.ROOT);
-    if (fallback == ItemDisplayContext.NONE) {
-      return ItemDisplayContext.create(key, TConstruct.getResource(name),fallback);
-    }
     return ItemDisplayContext.create(key, TConstruct.getResource(name), fallback);
   }
 }

@@ -62,6 +62,15 @@ public class MaterialModel implements IUnbakedGeometry<MaterialModel> {
   /** Transform matrix to apply to child parts */
   private final Vec2 offset;
 
+  /* TODO: Fix this
+   @Override
+  public Collection<Material> getMaterials(IGeometryBakingContext owner, Function<ResourceLocation,UnbakedModel> modelGetter, Set<Pair<String,String>> missingTextureErrors) {
+    Set<Material> allTextures = Sets.newHashSet();
+    getMaterialTextures(allTextures, owner, "texture", material);
+    return allTextures;
+  }
+   */
+
   /**
    * Gets the list of material textures for the given owner texture
    * @param allTextures  Collection of textures

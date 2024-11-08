@@ -64,8 +64,8 @@ import java.util.stream.Collectors;
 
 public class BlockLootTableProvider extends BlockLootSubProvider {
 
-  protected BlockLootTableProvider(Set<Item> p_249153_, FeatureFlagSet p_251215_) {
-    super(Collections.emptySet(), FeatureFlags.VANILLA_SET);
+  protected BlockLootTableProvider() {
+    super(Set.of(), FeatureFlags.REGISTRY.allFlags());
   }
 
   @Nonnull

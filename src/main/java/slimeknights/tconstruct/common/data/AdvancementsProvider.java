@@ -20,9 +20,11 @@ import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.NbtPredicate;
 import net.minecraft.advancements.critereon.PlayerInteractTrigger;
 import net.minecraft.advancements.critereon.PlayerTrigger;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
+import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -97,9 +99,10 @@ public class AdvancementsProvider extends GenericDataProvider {
   /** Advancment consumer instance */
   protected BiConsumer<ResourceLocation, ConditionalAdvancement.Builder> conditionalConsumer;
 
-  public AdvancementsProvider(PackOutput output, PackOutput.Target type, String folder, Gson gson) {
-    super(output, type, folder, gson);
+  public AdvancementsProvider(DataGenerator output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
+    super(output.getPackOutput(), PackOutput.Target.DATA_PACK, "advancements");
   }
+
 
 
   @Override

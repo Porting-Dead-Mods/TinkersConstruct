@@ -3,8 +3,7 @@ package slimeknights.tconstruct.common.data.loot;
 import net.minecraft.advancements.critereon.EntityEquipmentPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
@@ -41,8 +40,10 @@ import slimeknights.tconstruct.tools.modifiers.loot.ChrysophiliteLootCondition;
 import slimeknights.tconstruct.tools.modifiers.loot.HasModifierLootCondition;
 import slimeknights.tconstruct.tools.modifiers.loot.ModifierBonusLootFunction;
 
+import java.util.concurrent.CompletableFuture;
+
 public class GlobalLootModifiersProvider extends GlobalLootModifierProvider {
-  public GlobalLootModifiersProvider(DataGenerator gen) {
+  public GlobalLootModifiersProvider(DataGenerator gen, CompletableFuture<HolderLookup.Provider> lookupProvider) {
     super(gen.getPackOutput(), TConstruct.MOD_ID);
   }
 
