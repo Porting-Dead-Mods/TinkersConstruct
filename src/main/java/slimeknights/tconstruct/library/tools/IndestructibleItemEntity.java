@@ -2,6 +2,7 @@ package slimeknights.tconstruct.library.tools;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -33,7 +34,7 @@ public class IndestructibleItemEntity extends ItemEntity {
   }
 
   @Override
-  public Packet<?> getAddEntityPacket() {
+  public Packet<ClientGamePacketListener> getAddEntityPacket() {
     return NetworkHooks.getEntitySpawningPacket(this);
   }
 
@@ -63,7 +64,7 @@ public class IndestructibleItemEntity extends ItemEntity {
   @Override
   public boolean hurt(DamageSource source, float amount) {
     // prevent any damage besides out of world
-    return source.getMsgId().equals(DamageSource.OUT_OF_WORLD.msgId);
+    return source.getMsgId().equals(damageSources().fellOutOfWorld().getMsgId());
   }
 
   /** Checks if the given stack has a custom entity */

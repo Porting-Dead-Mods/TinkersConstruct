@@ -68,8 +68,8 @@ public class GreyToColorMapping implements IColorMapping {
   public int mapColor(int color) {
     // if fully transparent, just return fully transparent
     // we do not do 0 alpha RGB values to save effort
-    if (getA(color) == 0) {
-      return 0x00000000;
+    if (((color >> 24) & 0xFF) == 0) {
+      return 0x00000000; // Fully transparent black
     }
     int grey = getGrey(color);
     return scaleColor(color, getColorForGrey(grey), grey);
@@ -203,40 +203,56 @@ public class GreyToColorMapping implements IColorMapping {
    * @return  Interpolated color
    */
   public static int interpolateColors(int colorBefore, int greyBefore, int colorAfter, int greyAfter, int grey) {
-    // at this point, grey is strictly between first and second, interpolate between the two
     int diff = grey - greyBefore;
     int divisor = greyAfter - greyBefore;
-    // interpolate each pair of colors
-    int alpha = interpolate(getA(colorBefore), getA(colorAfter), diff, divisor);
-    int red   = interpolate(getR(colorBefore), getR(colorAfter),   diff, divisor);
-    int green = interpolate(getG(colorBefore), getG(colorAfter), diff, divisor);
-    int blue  = interpolate(getB(colorBefore), getB(colorAfter),  diff, divisor);
-    return combine(alpha, blue, green, red);
+
+    // Interpolate each color component (ARGB)
+    int alpha = getInterpolatedComponent((colorBefore >> 24) & 0xFF, (colorAfter >> 24) & 0xFF, diff, divisor);
+    int red   = getInterpolatedComponent((colorBefore >> 16) & 0xFF, (colorAfter >> 16) & 0xFF, diff, divisor);
+    int green = getInterpolatedComponent((colorBefore >> 8) & 0xFF, (colorAfter >> 8) & 0xFF, diff, divisor);
+    int blue  = getInterpolatedComponent(colorBefore & 0xFF, colorAfter & 0xFF, diff, divisor);
+
+    return (alpha << 24) | (red << 16) | (green << 8) | blue;
+  }
+
+  /** Helper function to interpolate a color component */
+  private static int getInterpolatedComponent(int start, int end, int diff, int divisor) {
+    return start + (end - start) * diff / divisor;
   }
 
   /** Gets the largest grey value for the given color */
   public static int getGrey(int color) {
-    return Math.max(getR(color), Math.max(getG(color), getB(color)));
+    int red = (color >> 16) & 0xFF;
+    int green = (color >> 8) & 0xFF;
+    int blue = color & 0xFF;
+    return Math.max(red, Math.max(green, blue));
   }
 
   /** Scales the new color based on the original color values and the grey value */
   public static int scaleColor(int original, int newColor, int grey) {
-    // if the original color was partially transparent, set the alpha
-    int alpha = getA(original);
-    if (alpha < 255) newColor = (newColor & 0x00FFFFFF) | ((alpha * getA(newColor) / 255) << 24);
+    int alpha = (original >> 24) & 0xFF;
+    if (alpha < 255) {
+      newColor = (newColor & 0x00FFFFFF) | ((alpha * ((newColor >> 24) & 0xFF) / 255) << 24);
+    }
 
-    // grey is based on largest, so scale down as needed
-    // if any of RGB are lower than the max, scale it down
-    int red = getR(original);
-    if (red   < grey) newColor = (newColor & 0xFFFFFF00) | (((newColor & 0x000000FF) * red   / grey) & 0x000000FF);
-    int green = getG(original);
-    if (green < grey) newColor = (newColor & 0xFFFF00FF) | (((newColor & 0x0000FF00) * green / grey) & 0x0000FF00);
-    int blue = getB(original);
-    if (blue  < grey) newColor = (newColor & 0xFF00FFFF) | (((newColor & 0x00FF0000) * blue  / grey) & 0x00FF0000);
+    int red = (original >> 16) & 0xFF;
+    if (red < grey) {
+      newColor = (newColor & 0xFFFFFF00) | (((newColor & 0x000000FF) * red / grey) & 0x000000FF);
+    }
 
-    // final color
+    int green = (original >> 8) & 0xFF;
+    if (green < grey) {
+      newColor = (newColor & 0xFFFF00FF) | (((newColor & 0x0000FF00) * green / grey) & 0x0000FF00);
+    }
+
+    int blue = original & 0xFF;
+    if (blue < grey) {
+      newColor = (newColor & 0xFF00FFFF) | (((newColor & 0x00FF0000) * blue / grey) & 0x00FF0000);
+    }
+
     return newColor;
   }
+
 
   /** Gets the color value without using the cache */
   public static <T, R> R getNearestByGrey(List<T> list, ToIntFunction<T> greyMap, int grey, Interpolate<T,R> interpolate) {

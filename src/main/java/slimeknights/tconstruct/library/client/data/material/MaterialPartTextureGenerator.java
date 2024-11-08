@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
@@ -72,37 +73,58 @@ public class MaterialPartTextureGenerator extends GenericTextureGenerator {
 
 
   @Override
-  public void run(CachedOutput cache) throws IOException {
+  public CompletableFuture<?> run(CachedOutput cache) {
+    // Initial callbacks
     runCallbacks(existingFileHelper, null);
-    
-    // ensure we have parts
+
+    // Validate that there are parts available
     List<PartSpriteInfo> parts = partProvider.getSprites();
     if (parts.isEmpty()) {
-      throw new IllegalStateException(partProvider.getName() + " has no parts, must have at least one part to generate");
+      throw new IllegalStateException(partProvider.getName() + " has no parts; must have at least one part to generate.");
     }
 
-    // for each material list, generate sprites
-    BiConsumer<ResourceLocation, NativeImage> saver = (path, image) -> saveImage(cache, path, image);
-    BiConsumer<ResourceLocation, JsonObject> metaSaver = (path, meta) -> saveMetadata(cache, path, meta);
+    // Prepare futures for asynchronous operations
+    List<CompletableFuture<Void>> futures = new ArrayList<>();
+
+    // For each material list, generate sprites
     for (AbstractMaterialSpriteProvider materialProvider : materialProviders) {
       Collection<MaterialSpriteInfo> materials = materialProvider.getMaterials().values();
       if (materials.isEmpty()) {
-        throw new IllegalStateException(materialProvider.getName() + " has no materials, must have at least one material to generate");
+        throw new IllegalStateException(materialProvider.getName() + " has no materials; must have at least one material to generate.");
       }
-      // want cross product of textures
+
+      // Define a predicate to check if a sprite should be generated
       Predicate<ResourceLocation> shouldGenerate = path -> !spriteReader.exists(path);
+
       for (MaterialSpriteInfo material : materials) {
         for (PartSpriteInfo part : parts) {
           if (material.supportStatType(part.getStatType()) || overrides.hasOverride(part.getStatType(), material.getTexture())) {
-            generateSprite(spriteReader, material, part, shouldGenerate, saver, metaSaver);
+            // Generate and save each sprite asynchronously
+            CompletableFuture<Void> spriteFuture = CompletableFuture.runAsync(() -> {
+              try {
+                generateSprite(spriteReader, material, part, shouldGenerate,
+                  (path, image) -> saveImage(cache, path, image),
+                  (path, meta) -> saveMetadata(cache, path, meta)
+                );
+              } catch (Exception e) {
+                throw new RuntimeException("Failed to generate sprite for " + part.getStatType(), e);
+              }
+            });
+            futures.add(spriteFuture);
           }
         }
       }
     }
-    spriteReader.closeAll();
-    partProvider.cleanCache();
-    runCallbacks(null, null);
+
+    // Close resources after all tasks complete
+    return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+      .thenRun(() -> {
+        spriteReader.closeAll();
+        partProvider.cleanCache();
+        runCallbacks(null, null);
+      });
   }
+
 
   /**
    * Generates the given sprite

@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -58,9 +59,9 @@ public class FancyItemFrameEntity extends ItemFrame implements IEntityAdditional
   public InteractionResult interact(Player player, InteractionHand hand) {
     if (!player.isShiftKeyDown() && getFrameId() == FrameType.CLEAR.getId() && !getItem().isEmpty()) {
       BlockPos behind = blockPosition().relative(direction.getOpposite());
-      BlockState state = level.getBlockState(behind);
+      BlockState state = level().getBlockState(behind);
       if (!state.isAir()) {
-        InteractionResult result = state.use(level, player, hand, Util.createTraceResult(behind, direction, false));
+        InteractionResult result = state.use(level(), player, hand, Util.createTraceResult(behind, direction, false));
         if (result.consumesAction()) {
           return result;
         }
@@ -79,7 +80,7 @@ public class FancyItemFrameEntity extends ItemFrame implements IEntityAdditional
       // diamond winds down every 30 seconds, but does not go past 0, makes a full timer 3:30
       if (rotationTimer >= 300) {
         rotationTimer = 0;
-        if (!level.isClientSide) {
+        if (!level().isClientSide) {
           int curRotation = getRotation();
           if (curRotation > 0) {
             this.setRotation(curRotation - 1);
@@ -89,7 +90,7 @@ public class FancyItemFrameEntity extends ItemFrame implements IEntityAdditional
       return;
     }
     // for gold and reversed gold, only increment timer serverside
-    if (!level.isClientSide) {
+    if (!level().isClientSide) {
       if (doesRotate(frameId)) {
         rotationTimer++;
         if (rotationTimer >= 20) {
@@ -114,7 +115,7 @@ public class FancyItemFrameEntity extends ItemFrame implements IEntityAdditional
   public void setItem(ItemStack stack, boolean updateComparator) {
     super.setItem(stack, updateComparator);
     // spinning frames reset to 0 on changing item
-    if (updateComparator && !level.isClientSide && doesRotate(getFrameId())) {
+    if (updateComparator && !level().isClientSide && doesRotate(getFrameId())) {
       setRotation(0, false);
     }
   }
@@ -123,7 +124,7 @@ public class FancyItemFrameEntity extends ItemFrame implements IEntityAdditional
   private void setRotationRaw(int rotationIn, boolean updateComparator) {
     this.getEntityData().set(DATA_ROTATION, rotationIn);
     if (updateComparator) {
-      this.level.updateNeighbourForOutputSignal(this.pos, Blocks.AIR);
+      this.level().updateNeighbourForOutputSignal(this.pos, Blocks.AIR);
     }
   }
 
@@ -132,7 +133,7 @@ public class FancyItemFrameEntity extends ItemFrame implements IEntityAdditional
     this.rotationTimer = 0;
     // diamond goes 0-8 rotation, no modulo and needs to sync with client
     if (getFrameId() == FrameType.DIAMOND.getId()) {
-      if (!level.isClientSide && updateComparator) {
+      if (!level().isClientSide && updateComparator) {
         // play a sound as diamond is special
         this.playSound(Sounds.ITEM_FRAME_CLICK.getSound(), 1.0f, 1.0f);
       }
@@ -224,7 +225,7 @@ public class FancyItemFrameEntity extends ItemFrame implements IEntityAdditional
   }
 
   @Override
-  public Packet<?> getAddEntityPacket() {
+  public Packet<ClientGamePacketListener> getAddEntityPacket() {
     return NetworkHooks.getEntitySpawningPacket(this);
   }
 

@@ -87,7 +87,7 @@ public class ContainerFillingRecipe implements ICastingRecipe, IMultiRecipe<Disp
                    .isPresent();
   }
 
-  /** @deprecated use {@link ICastingRecipe#assemble(Container)} */
+  /** @deprecated use  */
   @Override
   @Deprecated
   public ItemStack getResultItem() {

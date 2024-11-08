@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.library.json;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -35,7 +36,7 @@ public class TinkerLoadables {
   public static final StringLoadable<OreRateType> ORE_RATE_TYPE = new EnumLoadable<>(OreRateType.class);
 
   /* Registries */
-  public static final StringLoadable<ResourceLocation> CUSTOM_STAT = new RegistryLoadable<>(Registry.CUSTOM_STAT);
+  public static final StringLoadable<ResourceLocation> CUSTOM_STAT = new RegistryLoadable<>(Registries.CUSTOM_STAT);
 
   /* Tag keys */
   public static final StringLoadable<TagKey<Modifier>> MODIFIER_TAGS = Loadables.tagKey(ModifierManager.REGISTRY_KEY);

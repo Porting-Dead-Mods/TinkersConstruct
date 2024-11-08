@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -178,7 +179,7 @@ public class PiggyBackPackItem extends TooltipItem {
     @Override
     public void initializeClient(Consumer<IClientMobEffectExtensions> consumer) {
       consumer.accept(new IClientMobEffectExtensions() {
-        private void renderIcon(MobEffectInstance effect, PoseStack matrices, int x, int y) {
+        private void renderIcon(MobEffectInstance effect, GuiGraphics matrices, int x, int y) {
           RenderUtils.setup(Icons.ICONS);
           ElementScreen element = switch (effect.getAmplifier()) {
             case 0 -> Icons.PIGGYBACK_1;
@@ -190,14 +191,20 @@ public class PiggyBackPackItem extends TooltipItem {
         }
 
         @Override
-        public boolean renderInventoryIcon(MobEffectInstance effect, EffectRenderingInventoryScreen<?> gui, PoseStack matrices, int x, int y, int z) {
-          renderIcon(effect, matrices, x, y);
-          return true;
+        public boolean renderInventoryIcon(MobEffectInstance effect, EffectRenderingInventoryScreen<?> gui, GuiGraphics graphics, int x, int y, int z) {
+          return this.renderGuiIcon(effect, null, graphics, x, y, z, 1f);
         }
 
         @Override
-        public boolean renderGuiIcon(MobEffectInstance effect, Gui gui, PoseStack matrices, int x, int y, float z, float alpha) {
-          renderIcon(effect, matrices, x, y);
+        public boolean renderGuiIcon(MobEffectInstance effect, Gui gui, GuiGraphics graphics, int x, int y, float z, float alpha) {
+          RenderUtils.setup(Icons.ICONS);
+          ElementScreen element = switch (effect.getAmplifier()) {
+            case 0 -> Icons.PIGGYBACK_1;
+            case 1 -> Icons.PIGGYBACK_2;
+            default -> Icons.PIGGYBACK_3;
+          };
+
+          element.draw(graphics, x + 6, y + 7);
           return true;
         }
       });

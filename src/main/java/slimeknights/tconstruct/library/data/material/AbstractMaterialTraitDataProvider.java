@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import slimeknights.mantle.data.GenericDataProvider;
@@ -17,8 +18,10 @@ import slimeknights.tconstruct.library.modifiers.util.LazyModifier;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /** Base data generator for use in addons */
@@ -37,7 +40,7 @@ public abstract class AbstractMaterialTraitDataProvider extends GenericDataProvi
   private final AbstractMaterialDataProvider materials;
 
   public AbstractMaterialTraitDataProvider(DataGenerator gen, AbstractMaterialDataProvider materials) {
-    super(gen, PackType.SERVER_DATA, MaterialTraitsManager.FOLDER, GSON);
+    super(gen.getPackOutput(), PackOutput.Target.DATA_PACK, MaterialTraitsManager.FOLDER, GSON);
     this.materials = materials;
   }
 
@@ -45,11 +48,10 @@ public abstract class AbstractMaterialTraitDataProvider extends GenericDataProvi
   protected abstract void addMaterialTraits();
 
   @Override
-  public void run(CachedOutput cache) {
+  public CompletableFuture<Void> run(CachedOutput cache) {
     addMaterialTraits();
 
-    // ensure we have traits for all materials
-    // if you want no traits for your material, use an empty list
+    // Ensure we have traits for all materials
     Set<MaterialId> materialsGenerated = materials.getAllMaterials();
     for (MaterialId material : materialsGenerated) {
       if (!allMaterialTraits.containsKey(material)) {
@@ -57,9 +59,17 @@ public abstract class AbstractMaterialTraitDataProvider extends GenericDataProvi
       }
     }
 
-    // generate
-    allMaterialTraits.forEach((materialId, traits) -> saveJson(cache, materialId, traits.serialize()));
+    // Create a CompletableFuture for each saveJson operation
+    List<CompletableFuture<Void>> futures = allMaterialTraits.entrySet().stream()
+      .map(entry -> CompletableFuture.runAsync(() -> {
+        saveJson(cache, entry.getKey(), entry.getValue().serialize());
+      }))
+      .toList();
+
+    // Return a CompletableFuture that completes when all save operations are done
+    return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
   }
+
 
 
   /* Helpers */

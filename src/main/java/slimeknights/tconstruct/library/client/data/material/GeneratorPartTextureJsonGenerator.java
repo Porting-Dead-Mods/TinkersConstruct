@@ -8,8 +8,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.mantle.data.gson.ResourceLocationSerializer;
 import slimeknights.tconstruct.TConstruct;
@@ -18,11 +18,14 @@ import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.materials.stats.MaterialStatsId;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 /** Generates the file that tells the part generator command which parts are needed for your tools */
 public class GeneratorPartTextureJsonGenerator extends GenericDataProvider {
@@ -43,21 +46,25 @@ public class GeneratorPartTextureJsonGenerator extends GenericDataProvider {
   }
 
   public GeneratorPartTextureJsonGenerator(DataGenerator generator, String modId, AbstractPartSpriteProvider spriteProvider, StatOverride overrides) {
-    super(generator, PackType.CLIENT_RESOURCES, "tinkering", GSON);
+    super(generator.getPackOutput(), PackOutput.Target.RESOURCE_PACK, "tinkering", GSON);
     this.modId = modId;
     this.spriteProvider = spriteProvider;
     this.overrides = overrides;
   }
 
   @Override
-  public void run(CachedOutput cache) throws IOException {
+  public CompletableFuture<?> run(CachedOutput cache) {
     JsonObject json = new JsonObject();
     json.addProperty("replace", false);
-    json.add("parts", PartSpriteInfo.LIST_LOADABLE.serialize(spriteProvider.getSprites()));
-    if (!overrides.overrides.isEmpty()) {
-      json.add("overrides", overrides.serialize());
+    JsonArray parts = new JsonArray();
+    for (PartSpriteInfo spriteInfo : spriteProvider.getSprites()) {
+      parts.add(GSON.toJsonTree(spriteInfo));
     }
-    saveJson(cache, new ResourceLocation(modId, "generator_part_textures"), json);
+    json.add("parts", parts);
+    List<CompletableFuture<?>> futures = new ArrayList<>();
+    futures.add(saveJson(cache, new ResourceLocation(modId, "generator_part_textures"), json));
+
+    return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
   }
 
   @Override

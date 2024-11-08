@@ -84,6 +84,7 @@ public abstract class AbstractToolDefinitionDataProvider extends GenericDataProv
       }
       saveJson(cache, id, ToolDefinitionData.LOADABLE.serialize(entry.getValue().build()));
     }
+      return null;
   }
 
   /** Builder for an armor material to batch certain hooks */

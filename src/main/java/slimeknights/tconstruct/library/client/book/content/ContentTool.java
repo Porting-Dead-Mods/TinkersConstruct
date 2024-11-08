@@ -7,6 +7,7 @@ import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.CraftingContainer;
@@ -105,12 +106,12 @@ public class ContentTool extends PageContent {
 
   public ContentTool(IModifiableDisplay tool) {
     this.tool = tool;
-    this.toolName = Registry.ITEM.getKey(tool.asItem()).toString();
+    this.toolName = BuiltInRegistries.ITEM.getKey(tool.asItem()).toString();
     this.text = new TextData[] { new TextData(ForgeI18n.getPattern(tool.asItem().getDescriptionId() + ".description"))};
   }
 
   public ContentTool(Item item) {
-    this.toolName = Registry.ITEM.getKey(item.asItem()).toString();
+    this.toolName = BuiltInRegistries.ITEM.getKey(item.asItem()).toString();
     if (item instanceof IModifiableDisplay tool) {
       this.tool = tool;
     } else {
@@ -153,7 +154,7 @@ public class ContentTool extends PageContent {
         // get the stacks for the first crafting table recipe
         Recipe<CraftingContainer> recipe = Optional.ofNullable(Minecraft.getInstance().level)
                                                    .flatMap(world -> world.getRecipeManager().byType(RecipeType.CRAFTING).values().stream()
-                                                                          .filter(r -> r.getResultItem().getItem() == tool.asItem())
+                                                                          .filter(r -> r.getResultItem(world.registryAccess()).getItem() == tool.asItem())
                                                                           .findFirst())
                                                    .orElse(null);
         if (recipe != null) {

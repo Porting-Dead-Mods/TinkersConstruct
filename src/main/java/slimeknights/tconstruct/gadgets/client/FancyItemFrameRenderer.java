@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.gadgets.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -65,8 +66,8 @@ public class FancyItemFrameRenderer<T extends FancyItemFrameEntity> extends Item
     Direction facing = frame.getDirection();
     Vec3 offset = this.getRenderOffset(frame, partialTicks);
     matrices.translate(facing.getStepX() * 0.46875D - offset.x(), facing.getStepY() * 0.46875D - offset.y(), facing.getStepZ() * 0.46875D - offset.z());
-    matrices.mulPose(Vector3f.XP.rotationDegrees(frame.getXRot()));
-    matrices.mulPose(Vector3f.YP.rotationDegrees(180.0F - frame.getYRot()));
+    matrices.mulPose(Axis.XP.rotationDegrees(frame.getXRot()));
+    matrices.mulPose(Axis.YP.rotationDegrees(180.0F - frame.getYRot()));
 
     // render the frame
     ItemStack stack = frame.getItem();
@@ -91,16 +92,16 @@ public class FancyItemFrameRenderer<T extends FancyItemFrameEntity> extends Item
       // determine rotation for the item inside
       MapItemSavedData mapdata = null;
       if (isMap) {
-        mapdata = MapItem.getSavedData(stack, frame.level);
+        mapdata = MapItem.getSavedData(stack, frame.level());
       }
       int frameRotation = frame.getRotation();
       // for diamond, render the timer as a partial rotation
       if (frameType == FrameType.DIAMOND) {
         int rotation = mapdata != null ? (frameRotation + 2) % 4 * 4 : frameRotation;
-        matrices.mulPose(Vector3f.ZP.rotationDegrees(rotation * 360f / 16f));
+        matrices.mulPose(Axis.ZP.rotationDegrees(rotation * 360f / 16f));
       } else {
         int rotation = mapdata != null ? (frameRotation + 2) % 4 * 2 : frameRotation;
-        matrices.mulPose(Vector3f.ZP.rotationDegrees(rotation * 360f / 8f));
+        matrices.mulPose(Axis.ZP.rotationDegrees(rotation * 360f / 8f));
       }
       if (!MinecraftForge.EVENT_BUS.post(new RenderItemInFrameEvent(frame, this, matrices, bufferIn, packedLight))) {
         if (mapdata != null) {
@@ -114,7 +115,7 @@ public class FancyItemFrameRenderer<T extends FancyItemFrameEntity> extends Item
           float scale = frameType == FrameType.CLEAR ? 0.75f : 0.5f;
           matrices.scale(scale, scale, scale);
           int light = frameType == FrameType.MANYULLYN ? 0x00F000F0 : packedLight;
-          this.itemRenderer.renderStatic(stack, ItemTransforms.TransformType.FIXED, light, OverlayTexture.NO_OVERLAY, matrices, bufferIn, frame.getId());
+          this.itemRenderer.renderStatic(stack, ItemDisplayContext.FIXED, light, OverlayTexture.NO_OVERLAY, matrices, bufferIn, frame.level(), frame.getId());
         }
       }
     }

@@ -147,6 +147,7 @@ public class WorldgenDatapackRegistryProvider implements DataProvider {
     registryName(Registry.STRUCTURE_SET_REGISTRY, structureSets).run(cache);
     registryKey(Registry.STRUCTURE_REGISTRY, structures).run(cache);
     registryName(ForgeRegistries.Keys.BIOME_MODIFIERS, biomeModifiers).run(cache);
+      return null;
   }
 
   @Override

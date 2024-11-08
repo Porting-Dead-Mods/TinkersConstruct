@@ -14,8 +14,11 @@ import net.minecraft.world.level.block.LiquidBlock;
 import slimeknights.mantle.data.GenericDataProvider;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 /** Quick and dirty data provider to generate blockstate files for fluids */
 public class FluidBlockstateModelProvider extends GenericDataProvider {
@@ -27,8 +30,9 @@ public class FluidBlockstateModelProvider extends GenericDataProvider {
 
   @Override
   public CompletableFuture<?> run(CachedOutput cachedOutput) {
-    // TODO: Make it throw IOException whatever that means
-    // statically created JSON to reference block/fluid, which is just a dummy model
+    List<CompletableFuture<?>> futures = new ArrayList<>();
+
+    // Statically created JSON to reference block/fluid, acting as a dummy model
     JsonObject normal = new JsonObject();
     normal.addProperty("model", "tconstruct:block/fluid");
     JsonObject variants = new JsonObject();
@@ -36,15 +40,21 @@ public class FluidBlockstateModelProvider extends GenericDataProvider {
     JsonObject blockstate = new JsonObject();
     blockstate.add("variants", variants);
 
-    // loop over all liquid blocks, adding a blockstate for them
-    for (Entry<ResourceKey<Block>,Block> entry : BuiltInRegistries.BLOCK.entrySet()) {
+    // Loop over all liquid blocks, adding a blockstate for them asynchronously
+    for (Entry<ResourceKey<Block>, Block> entry : BuiltInRegistries.BLOCK.entrySet()) {
       ResourceLocation id = entry.getKey().location();
       if (id.getNamespace().equals(modId) && entry.getValue() instanceof LiquidBlock) {
-        saveJson(cachedOutput, id, blockstate);
+        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+          saveJson(cachedOutput, id, blockstate);
+        });
+        futures.add(future);
       }
     }
-    return CompletableFuture.completedFuture(null);
+
+    // Combine all asynchronous save tasks and propagate any exceptions that may occur
+    return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
   }
+
 
   @Override
   public String getName() {

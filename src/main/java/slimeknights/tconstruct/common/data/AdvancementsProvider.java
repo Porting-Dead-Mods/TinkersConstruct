@@ -2,6 +2,7 @@ package slimeknights.tconstruct.common.data;
 
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -80,7 +81,9 @@ import slimeknights.tconstruct.world.TinkerWorld;
 import slimeknights.tconstruct.world.block.FoliageType;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -444,23 +447,38 @@ public class AdvancementsProvider extends GenericDataProvider {
   @Override
   public CompletableFuture<?> run(CachedOutput cachedOutput) {
     Set<ResourceLocation> set = Sets.newHashSet();
+    List<CompletableFuture<?>> futures = new ArrayList<>();
+
+    // Asynchronous consumer for regular advancements
     this.advancementConsumer = advancement -> {
       if (!set.add(advancement.getId())) {
         throw new IllegalStateException("Duplicate advancement " + advancement.getId());
       } else {
-        saveJson(cachedOutput, advancement.getId(), advancement.deconstruct().serializeToJson());
+        // Use a CompletableFuture to handle asynchronous saving
+        futures.add(CompletableFuture.runAsync(() ->
+          saveJson(cachedOutput, advancement.getId(), advancement.deconstruct().serializeToJson())
+        ));
       }
     };
+
+    // Asynchronous consumer for conditional advancements
     this.conditionalConsumer = (id, advancement) -> {
       if (!set.add(id)) {
         throw new IllegalStateException("Duplicate advancement " + id);
       } else {
-        saveJson(cachedOutput, id, advancement.write());
+        JsonObject jsonObject = advancement.write();
+        futures.add(CompletableFuture.runAsync(() ->
+          saveJson(cachedOutput, id, jsonObject)
+        ));
       }
     };
+
     generate();
-    return CompletableFuture.completedFuture(null);
+
+    // Wait for all asynchronous tasks to complete
+    return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
   }
+
 
   /* Helpers */
 

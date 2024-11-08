@@ -32,6 +32,7 @@ public abstract class AbstractEnchantmentToModifierProvider extends GenericDataP
     enchantmentMap.entrySet().clear();
     addEnchantmentMappings();
     saveJson(pCache, TConstruct.getResource("enchantments_to_modifiers"), enchantmentMap);
+      return null;
   }
 
   /* Helpers */

@@ -3,7 +3,7 @@ package slimeknights.tconstruct.library.data.material;
 import com.google.gson.JsonElement;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.server.packs.PackType;
+import net.minecraft.data.PackOutput;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.json.MaterialStatJson;
@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /** Base data generator for use in addons, depends on the regular material provider */
@@ -28,7 +29,7 @@ public abstract class AbstractMaterialStatsDataProvider extends GenericDataProvi
   private final AbstractMaterialDataProvider materials;
 
   public AbstractMaterialStatsDataProvider(DataGenerator gen, AbstractMaterialDataProvider materials) {
-    super(gen, PackType.SERVER_DATA, MaterialStatsManager.FOLDER);
+    super(gen, PackOutput.Target.DATA_PACK, MaterialStatsManager.FOLDER);
     this.materials = materials;
   }
 
@@ -36,19 +37,26 @@ public abstract class AbstractMaterialStatsDataProvider extends GenericDataProvi
   protected abstract void addMaterialStats();
 
   @Override
-  public void run(CachedOutput cache) {
+  public CompletableFuture<Void> run(CachedOutput cache) {
     addMaterialStats();
 
-    // ensure we have stats for all materials
+    // Ensure we have stats for all materials
     Set<MaterialId> materialsGenerated = materials.getAllMaterials();
     for (MaterialId material : materialsGenerated) {
       if (!allMaterialStats.containsKey(material)) {
         throw new IllegalStateException(String.format("Missing material stats for '%s'", material));
       }
     }
-    // does not ensure we have materials for all stats, we may be adding stats for another mod
-    // generate finally
-    allMaterialStats.forEach((materialId, materialStats) -> saveJson(cache, materialId, convert(materialStats)));
+
+    // Create a CompletableFuture for each save operation
+    List<CompletableFuture<Void>> futures = allMaterialStats.entrySet().stream()
+      .map(entry -> CompletableFuture.runAsync(() -> {
+        saveJson(cache, entry.getKey(), convert(entry.getValue()));
+      }))
+      .toList();
+
+    // Return a CompletableFuture that completes when all save operations are done
+    return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
   }
 
 

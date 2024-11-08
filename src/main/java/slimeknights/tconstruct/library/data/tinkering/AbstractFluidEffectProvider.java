@@ -57,6 +57,7 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
   public void run(CachedOutput cache) throws IOException {
     addFluids();
     entries.forEach((id, data) -> saveJson(cache, id, data.build()));
+      return null;
   }
 
   /* Helpers */

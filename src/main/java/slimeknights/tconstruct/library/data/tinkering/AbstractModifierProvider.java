@@ -116,6 +116,7 @@ public abstract class AbstractModifierProvider extends GenericDataProvider {
     addModifiers();
     allModifiers.forEach((id, data) -> saveJson(cache, id, data.serialize()));
     composableModifiers.forEach((id, data) -> saveJson(cache, id, data.serialize()));
+      return null;
   }
 
   /** Serializes the given modifier with its condition and redirects */

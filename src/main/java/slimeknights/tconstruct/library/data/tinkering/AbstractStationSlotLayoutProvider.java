@@ -67,5 +67,6 @@ public abstract class AbstractStationSlotLayoutProvider extends GenericDataProvi
   public void run(CachedOutput cache) throws IOException {
     addLayouts();
     allLayouts.forEach((id, builder) -> saveJson(cache, id, builder.build()));
+      return null;
   }
 }

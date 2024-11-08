@@ -14,6 +14,7 @@ import net.minecraftforge.client.model.QuadTransformers;
 import net.minecraftforge.client.model.SimpleModelState;
 import net.minecraftforge.client.model.geometry.UnbakedGeometryHelper;
 import net.minecraftforge.fluids.FluidStack;
+import org.joml.Vector3f;
 import slimeknights.mantle.client.model.util.ColoredBlockModel;
 import slimeknights.mantle.util.ItemLayerPixels;
 import slimeknights.tconstruct.TConstruct;
@@ -84,7 +85,7 @@ public class FluidModifierModel extends NormalModifierModel {
     FluidStack fluid = helper.getFluid(tool);
     // must have fluid
     if (!fluid.isEmpty()) {
-      // must have texture for the proper state
+      // must-have texture for the proper state
       Material template = getTemplate(tool, entry, fluid, isLarge);
       if (template != null) {
         // fluid properties
@@ -92,7 +93,7 @@ public class FluidModifierModel extends NormalModifierModel {
         TextureAtlasSprite fluidSprite = spriteGetter.apply(new Material(InventoryMenu.BLOCK_ATLAS, attributes.getStillTexture(fluid)));
 
         // build fluid like the forge dynamic container model
-        List<BlockElement> unbaked = UnbakedGeometryHelper.createUnbakedItemMaskElements(-1, spriteGetter.apply(template)); // Use template as mask
+        List<BlockElement> unbaked = UnbakedGeometryHelper.createUnbakedItemMaskElements(-1, spriteGetter.apply(template).contents()); // Use template as mask
         // TODO: is there anything that can be done about the fluid? to prevent weird offsets?
         List<BakedQuad> fluidQuads = UnbakedGeometryHelper.bakeElements(unbaked, mat -> fluidSprite, new SimpleModelState(transforms.applyOrigin(ORIGIN).compose(FluidContainerModel.FLUID_TRANSFORM), false), BAKE_LOCATION); // Bake with fluid texture
 

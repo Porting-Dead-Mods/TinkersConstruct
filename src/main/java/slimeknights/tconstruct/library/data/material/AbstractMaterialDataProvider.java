@@ -2,7 +2,9 @@ package slimeknights.tconstruct.library.data.material;
 
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.common.crafting.conditions.NotCondition;
 import net.minecraftforge.common.crafting.conditions.OrCondition;
@@ -18,9 +20,11 @@ import slimeknights.tconstruct.library.materials.json.MaterialJson;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -56,7 +60,7 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
   private boolean addMaterialsRun = false;
 
   public AbstractMaterialDataProvider(DataGenerator gen) {
-    super(gen, PackType.SERVER_DATA, MaterialManager.FOLDER, MaterialManager.GSON);
+    super(gen.getPackOutput(), PackOutput.Target.DATA_PACK, MaterialManager.FOLDER, MaterialManager.GSON);
   }
 
   /**
@@ -73,9 +77,18 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
   }
 
   @Override
-  public void run(CachedOutput cache) {
+  public CompletableFuture<?> run(CachedOutput cachedOutput) {
     ensureAddMaterialsRun();
-    allMaterials.forEach((id, data) -> saveJson(cache, id, convert(data)));
+
+    // Create a CompletableFuture for each saveJson operation and collect them
+    List<CompletableFuture<Void>> futures = allMaterials.entrySet().stream()
+      .map(entry -> CompletableFuture.runAsync(() -> {
+        saveJson(cachedOutput, entry.getKey(), convert(entry.getValue()));
+      }))
+      .toList();
+
+    // Wait for all tasks to complete
+    return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
   }
 
   /**

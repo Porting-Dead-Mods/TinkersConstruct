@@ -8,8 +8,6 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 
-import static com.mojang.blaze3d.platform.NativeImage.getA;
-
 /**
  * Supports including sprites as "part of the palette" which can produce animated textures.
  */
@@ -32,8 +30,8 @@ public class AnimatedGreyToSpriteTransformer extends GreyToSpriteTransformer {
   private int getNewColor(int color, int x, int y, int frame) {
     // if fully transparent, just return fully transparent
     // we do not do 0 alpha RGB values to save effort
-    if (getA(color) == 0) {
-      return 0x00000000;
+    if (((color >> 24) & 0xFF) == 0) {
+      return 0x00000000; // Fully transparent black
     }
     int grey = GreyToColorMapping.getGrey(color);
     int newColor = getSpriteRange(grey).getColor(x, y, frame, grey);

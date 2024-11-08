@@ -17,9 +17,11 @@ import slimeknights.tconstruct.library.client.data.util.DataGenSpriteReader;
 import slimeknights.tconstruct.shared.block.SlimeType;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import static slimeknights.tconstruct.TConstruct.getResource;
 
@@ -33,45 +35,71 @@ public class ModelSpriteProvider extends GenericTextureGenerator {
     spriteReader = new DataGenSpriteReader(existingFileHelper, "textures");
   }
 
-  @Override // TODO: Make this throw IOException
-  public CompletableFuture<?> run(CachedOutput cachedOutput){
+  @Override
+  public CompletableFuture<?> run(CachedOutput cachedOutput) {
+    List<CompletableFuture<?>> futures = new ArrayList<>();
     ResourceLocation rootsSide = getResource("block/wood/enderbark/roots");
     ResourceLocation rootsTop = getResource("block/wood/enderbark/roots_top");
 
-    // generate slimy root textures
+    // Generate slimy root textures asynchronously
     for (SlimeType slime : SlimeType.values()) {
       String name = slime.getSerializedName();
       ResourceLocation congealed = getResource("block/slime/storage/congealed_" + name);
-      stackSprites(cachedOutput, getResource("block/wood/enderbark/roots/" + name), rootsSide, congealed);
-      stackSprites(cachedOutput, getResource("block/wood/enderbark/roots/" + name + "_top"), rootsTop, congealed);
+
+      futures.add(CompletableFuture.runAsync(() -> stackSprites(cachedOutput, getResource("block/wood/enderbark/roots/" + name), rootsSide, congealed)));
+      futures.add(CompletableFuture.runAsync(() -> stackSprites(cachedOutput, getResource("block/wood/enderbark/roots/" + name + "_top"), rootsTop, congealed)));
     }
 
-    // dummy parts
-    ISpriteTransformer stoneColor = new RecolorSpriteTransformer(GreyToColorMapping.builderFromBlack().addARGB(63, 0xFF181818).addARGB(102, 0xFF494949).addARGB(140, 0xFF5A5A5A).addARGB(178, 0xFF787777).addARGB(216, 0xFF95918D).addARGB(255, 0xFFB3B1AF).build());
-    try {
-      transformSprite(cachedOutput, getResource("item/tool/parts/plating_helmet"),     getResource("item/tool/armor/plate/helmet/plating"), new OffsettingSpriteTransformer(stoneColor, 0, 2));
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-    try {
-      transformSprite(cachedOutput, getResource("item/tool/parts/plating_chestplate"), getResource("item/tool/armor/plate/chestplate/plating"), stoneColor);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-    try {
-      transformSprite(cachedOutput, getResource("item/tool/parts/plating_leggings"),   getResource("item/tool/armor/plate/leggings/plating"), new OffsettingSpriteTransformer(stoneColor, 0, 1));
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-    try {
-      transformSprite(cachedOutput, getResource("item/tool/parts/plating_boots"),      getResource("item/tool/armor/plate/boots/plating"), stoneColor);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    // Define stone color transformation
+    ISpriteTransformer stoneColor = new RecolorSpriteTransformer(
+      GreyToColorMapping.builderFromBlack()
+        .addARGB(63, 0xFF181818)
+        .addARGB(102, 0xFF494949)
+        .addARGB(140, 0xFF5A5A5A)
+        .addARGB(178, 0xFF787777)
+        .addARGB(216, 0xFF95918D)
+        .addARGB(255, 0xFFB3B1AF)
+        .build()
+    );
 
-    spriteReader.closeAll();
-    return CompletableFuture.completedFuture(null);
+    // Dummy parts - Apply transformations asynchronously
+    futures.add(CompletableFuture.runAsync(() -> {
+      try {
+        transformSprite(cachedOutput, getResource("item/tool/parts/plating_helmet"), getResource("item/tool/armor/plate/helmet/plating"), new OffsettingSpriteTransformer(stoneColor, 0, 2));
+      } catch (IOException e) {
+        throw new CompletionException(e);
+      }
+    }));
+
+    futures.add(CompletableFuture.runAsync(() -> {
+      try {
+        transformSprite(cachedOutput, getResource("item/tool/parts/plating_chestplate"), getResource("item/tool/armor/plate/chestplate/plating"), stoneColor);
+      } catch (IOException e) {
+        throw new CompletionException(e);
+      }
+    }));
+
+    futures.add(CompletableFuture.runAsync(() -> {
+      try {
+        transformSprite(cachedOutput, getResource("item/tool/parts/plating_leggings"), getResource("item/tool/armor/plate/leggings/plating"), new OffsettingSpriteTransformer(stoneColor, 0, 1));
+      } catch (IOException e) {
+        throw new CompletionException(e);
+      }
+    }));
+
+    futures.add(CompletableFuture.runAsync(() -> {
+      try {
+        transformSprite(cachedOutput, getResource("item/tool/parts/plating_boots"), getResource("item/tool/armor/plate/boots/plating"), stoneColor);
+      } catch (IOException e) {
+        throw new CompletionException(e);
+      }
+    }));
+
+    // Close the sprite reader after all tasks are done
+    return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+      .thenRun(spriteReader::closeAll);
   }
+
 
   /** Gets the LCM of two ints */
   private static int lcm(int a, int b){
@@ -139,8 +167,8 @@ public class ModelSpriteProvider extends GenericTextureGenerator {
         for (NativeImage sprite : sprites) {
           // tile the sprite if its smaller than the output, lets you merge multiple animations
           int spriteColor = sprite.getPixelRGBA(x % sprite.getHeight(), y % sprite.getHeight());
-          if (NativeImage.getA(spriteColor) != 0) {
-            // TODO: this does not merge alpha, though will we ever need that?
+          if (((spriteColor >> 24) & 0xFF) != 0) {
+            // This code will only execute if the alpha component is non-zero
             color = spriteColor;
             break;
           }

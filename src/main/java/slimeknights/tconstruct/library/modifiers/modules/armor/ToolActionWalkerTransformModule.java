@@ -76,7 +76,7 @@ public record ToolActionWalkerTransformModule(ToolAction action, SoundEvent soun
 
   @Override
   public MutableUseOnContext getContext(IToolStackView tool, ModifierEntry modifier, LivingEntity living, BlockPos prevPos, BlockPos newPos) {
-    return new MutableUseOnContext(living.getLevel(), living instanceof Player p ? p : null, InteractionHand.MAIN_HAND, living.getItemBySlot(EquipmentSlot.FEET), Util.createTraceResult(newPos, Direction.UP, false));
+    return new MutableUseOnContext(living.level(), living instanceof Player p ? p : null, InteractionHand.MAIN_HAND, living.getItemBySlot(EquipmentSlot.FEET), Util.createTraceResult(newPos, Direction.UP, false));
   }
 
   @Override

@@ -10,7 +10,10 @@ import slimeknights.tconstruct.library.client.data.spritetransformer.IColorMappi
 import slimeknights.tconstruct.library.client.data.spritetransformer.RecolorSpriteTransformer;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.CompletableFuture;
 
 /** Simple generator that generates a texture showing the entire range for a palette */
 public class MaterialPaletteDebugGenerator extends GenericTextureGenerator {
@@ -23,25 +26,39 @@ public class MaterialPaletteDebugGenerator extends GenericTextureGenerator {
   }
 
   @Override
-  public void run(CachedOutput cache) throws IOException {
+  public CompletableFuture<?> run(CachedOutput cache) {
+    List<CompletableFuture<?>> futures = new ArrayList<>();
+
     for (AbstractMaterialSpriteProvider materialProvider : materialProviders) {
-      for (Entry<ResourceLocation,MaterialSpriteInfo> entry : materialProvider.getMaterials().entrySet()) {
+      for (Entry<ResourceLocation, MaterialSpriteInfo> entry : materialProvider.getMaterials().entrySet()) {
         if (entry.getValue().getTransformer() instanceof RecolorSpriteTransformer recolor) {
           IColorMapping colorMapping = recolor.getColorMapping();
-          NativeImage palette = new NativeImage(256, 16, true);
-          for (int grey = 0; grey < 256; grey++) {
-            // set the grey value to RGB, leave alpha as 255
-            int color = colorMapping.mapColor(grey | (grey << 8) | (grey << 16) | 0xFF000000);
-            for (int height = 0; height < 16; height++) {
-              palette.setPixelRGBA(grey, height, color);
+
+          // Create the image palette asynchronously
+          CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+            NativeImage palette = new NativeImage(256, 16, true);
+            for (int grey = 0; grey < 256; grey++) {
+              // Set the grey value to RGB, leave alpha as 255
+              int color = colorMapping.mapColor(grey | (grey << 8) | (grey << 16) | 0xFF000000);
+              for (int height = 0; height < 16; height++) {
+                palette.setPixelRGBA(grey, height, color);
+              }
             }
-          }
-          saveImage(cache, entry.getKey(), palette);
-          palette.close();
+
+            // Save the palette image and close it
+            saveImage(cache, entry.getKey(), palette);
+            palette.close();
+          });
+
+          futures.add(future);  // Add to the list of futures
         }
       }
     }
+
+    // Wait for all image saving tasks to complete
+    return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
   }
+
 
   @Override
   public String getName() {

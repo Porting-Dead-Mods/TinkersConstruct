@@ -34,8 +34,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.ToIntFunction;
 
-import static com.mojang.blaze3d.platform.NativeImage.getA;
-
 /**
  * Supports including sprites as "part of the palette"
  */
@@ -75,8 +73,8 @@ public class GreyToSpriteTransformer implements ISpriteTransformer {
   private int getNewColor(int color, int x, int y) {
     // if fully transparent, just return fully transparent
     // we do not do 0 alpha RGB values to save effort
-    if (getA(color) == 0) {
-      return 0x00000000;
+    if (((color >> 24) & 0xFF) == 0) {
+      return 0x00000000; // Fully transparent black
     }
     int grey = GreyToColorMapping.getGrey(color);
     int newColor = getSpriteRange(grey).getColor(x, y, grey);
@@ -287,26 +285,40 @@ public class GreyToSpriteTransformer implements ISpriteTransformer {
           int green = 0;
           int blue = 0;
           int alpha = 0;
+
           for (int x = 0; x < image.getWidth(); x++) {
             for (int y = 0; y < image.getHeight(); y++) {
               int color = image.getPixelRGBA(x, y);
-              red   += NativeImage.getR(color);
-              green += NativeImage.getG(color);
-              blue  += NativeImage.getB(color);
-              alpha += NativeImage.getA(color);
+
+              // Extract individual color components
+              alpha += (color >> 24) & 0xFF; // Extract alpha
+              red   += (color >> 16) & 0xFF; // Extract red
+              green += (color >> 8) & 0xFF;  // Extract green
+              blue  += color & 0xFF;         // Extract blue
             }
           }
+
           int pixels = image.getWidth() * image.getHeight();
-          int spriteColor = NativeImage.combine(alpha / pixels, blue / pixels, green / pixels, red / pixels);
-          // if we have a color set, treat it as a tint
+          // Average each color component
+          int avgAlpha = alpha / pixels;
+          int avgRed = red / pixels;
+          int avgGreen = green / pixels;
+          int avgBlue = blue / pixels;
+
+          // Combine components back into ARGB format
+          int spriteColor = (avgAlpha << 24) | (avgRed << 16) | (avgGreen << 8) | avgBlue;
+
+          // If we have a color set, apply it as a tint
           if (color != -1) {
             spriteColor = GreyToColorMapping.scaleColor(spriteColor, color, 255);
           }
+
           return spriteColor;
         }
       }
       return color;
     }
+
 
     /** Checks if these two mappings have the same values */
     public boolean isSame(SpriteMapping other) {

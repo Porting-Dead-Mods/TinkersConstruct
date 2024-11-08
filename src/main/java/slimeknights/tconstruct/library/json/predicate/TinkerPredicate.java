@@ -14,7 +14,7 @@ public class TinkerPredicate {
   private TinkerPredicate() {}
 
   /** Entities that are in the air, notably does not count you as airborne if swimming, riding, or climbing */
-  public static LivingEntityPredicate AIRBORNE = LivingEntityPredicate.simple(entity -> !entity.isOnGround() && !entity.onClimbable() && !entity.isInWater() && !entity.isPassenger());
+  public static LivingEntityPredicate AIRBORNE = LivingEntityPredicate.simple(entity -> !entity.onGround() && !entity.onClimbable() && !entity.isInWater() && !entity.isPassenger());
 
   /** Helper for dealing with the common case of nullable entities, often used when they are entity but not living. */
   public static boolean matches(IJsonPredicate<LivingEntity> predicate, @Nullable LivingEntity entity) {
